@@ -177,7 +177,7 @@
         <div class="col">
           <section class="panel">
             <h3>${t === 1 ? 'Ha llegado antes de este tic' : `Llegó a mitad del tic ${t - 1}: cuenta para tu decisión de ahora`}</h3>
-            ${ev.length ? `<ul class="eventos">${ev.map((e) => eventoHTML(rol, e)).join('')}</ul>` : '<p class="vacio">No ha llegado nada.</p>'}
+            ${ev.length ? `<ul class="eventos">${ev.map((e) => eventoHTML(rol, e)).join('')}</ul>` : '<p class="vacio">No ha llegado nada</p>'}
           </section>
           ${cfg.hoja ? `
           <section class="panel">
@@ -191,7 +191,7 @@
                   <details class="def" data-def="${k}" ${abiertos.has(k) ? 'open' : ''}><summary>¿Qué es?</summary><p>${def}</p></details>
                 </div>`).join('')}
             </div>
-            <p class="ayuda" style="margin:.6rem 0 0">El valor gris es lo que apuntaste en el tic anterior.</p>
+            <p class="ayuda nota">El valor gris es lo que apuntaste en el tic anterior</p>
           </section>` : ''}
           <section class="panel">
             <h3>Tu tarjeta para este tic</h3>
@@ -201,7 +201,7 @@
             </div>
             ${tarjetaHTML(rol, verEval)}
             ${verEval ? veredictoHTML(ultimaEval) : ''}
-            <p class="ayuda" id="aviso" role="alert" style="margin:.6rem 0 0"></p>
+            <p class="ayuda nota" id="aviso" role="alert"></p>
             <div class="acciones">
               ${verEval
                 ? '<button class="btn primario" id="seguir">Siguiente tic</button>'
@@ -329,7 +329,7 @@
   function veredictoHTML(ev) {
     if (!ev) return '';
     const malCampos = ev.campos.filter((c) => !c.ok);
-    return `<div class="veredicto ${ev.ok ? 'ok' : 'mal'}" style="margin-top:12px">
+    return `<div class="veredicto ${ev.ok ? 'ok' : 'mal'}">
       <strong>${ev.decision.ok ? 'Decisión correcta' : 'Decisión incorrecta'}</strong>
       ${esc(ev.decision.texto)}
       ${malCampos.length ? `<ul>${malCampos.map((c) => `<li><code>${c.nombre}</code>: era <b class="num">${c.correcto}</b> (pusiste ${c.tuyo})</li>`).join('')}</ul>` : ''}
@@ -449,7 +449,7 @@
       <div class="fichero" role="list" aria-label="El fichero en B">
         ${res.trozos.map((t) => `<div class="trozo ${t.estado}" role="listitem" title="${nombre[t.estado]}"><span class="num">${t.sn}</span><small>${nombre[t.estado]}</small></div>`).join('')}
       </div>
-      <p class="ayuda" style="margin:.5rem 0 0">El fichero tal como lo tiene B al final, en trozos de 64 B.</p>
+      <p class="ayuda nota">El fichero tal como lo tiene B al final, en trozos de 64 B</p>
     </section>`;
   }
 
@@ -477,8 +477,8 @@
           <div class="leyenda">
             <span><i style="background:var(--a)"></i>Datos de A</span>
             <span><i style="background:var(--b)"></i>ACK de B</span>
-            <span><i style="background:var(--b);height:9px;width:9px;opacity:.8"></i>64 B en orden sin leer</span>
-            <span><i style="background:var(--b-soft);border:1px dashed var(--b);height:9px;width:9px"></i>64 B guardados fuera de orden</span>
+            <span><i style="background:var(--b);height:8px;width:8px;opacity:.85"></i>64 B en orden sin leer</span>
+            <span><i style="background:var(--b-soft);border:1px dashed var(--b);height:8px;width:8px"></i>64 B guardados fuera de orden</span>
             <span><i style="border-top:2px dashed var(--muted);height:0"></i>✗ se pierde en la red</span>
             <span>A la izquierda, lo que sabía A: en vuelo / W</span>
             <span><b class="no">✗</b> junto al tic: te equivocaste · en B: segmento descartado (etiqueta en rojo)</span>
