@@ -1,5 +1,5 @@
 {
- "nota": "Extracto de las trazas del Wooclap de GG33 (modelo ModeloTcp de la web de ejercicios): apartados inmediata, lenta y cero.",
+ "nota": "Soluciones de referencia de los ejercicios de control de flujo (lectura inmediata, lenta y con ventana cero), calculadas con el simulador de ejercicios de la asignatura.",
  "apartados": {
   "inmediata": {
    "segmentos": [

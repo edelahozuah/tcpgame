@@ -5,7 +5,7 @@ El alumno hace de cliente (emisor) o de servidor (receptor) y decide en cada tic
 
 **Jugar:** <https://edelahozuah.github.io/tcpgame/>
 
-Material docente sobre TCP (sesión GG33; Kurose y Ross, §3.5.3–3.5.6).
+Material docente sobre TCP (Kurose y Ross, §3.5.3–3.5.6).
 
 ## Qué incluye
 
@@ -22,7 +22,7 @@ El modelo de tics es el de los ejercicios de la asignatura: un segmento sale al 
 | Ruta | Contenido |
 |---|---|
 | `web/` | El juego: página estática sin dependencias (`index.html`, `motor.js`, `juego.js`) |
-| `tests/` | Pruebas del motor: `node tests/pruebas_motor.js` (contra las trazas de referencia de GG33 y casos de error típicos) |
+| `tests/` | Pruebas del motor: `node tests/pruebas_motor.js` (contra las soluciones de referencia de los ejercicios y casos de error típicos) |
 | `Reglamento_TCPGame.md` | Reglas de la versión en papel |
 
 Para probarlo en local basta con servir la carpeta `web/`, por ejemplo `python3 -m http.server -d web 8000` y abrir <http://localhost:8000>.

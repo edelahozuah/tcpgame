@@ -1,6 +1,6 @@
 # TCPGame: reglamento v0.2 (control de flujo, sin segmento de sondeo)
 
-> Borrador del 2026-11-07. Usa el modelo de la web de ejercicios (`Practica_Web/docs/22`, §2) y los números del Wooclap de GG33 (`../Wooclap/trazas_gg33.json`): A envía 6 × 64 B a B, que tiene un búfer de 256 B. Las tres partidas de referencia del §9 coinciden tic a tic con las trazas `inmediata`, `lenta` y `cero`. Variables con los nombres de Kurose ES. Los tics se cuentan desde 1, como en la web; las figuras del Wooclap empiezan en t = 0.
+> Borrador del 2026-11-07. Usa el mismo modelo de tiempo y las mismas reglas que el simulador de ejercicios de secuencias TCP de la asignatura, y los números de los ejercicios de clase sobre control de flujo: A envía 6 × 64 B a B, que tiene un búfer de 256 B. Las tres partidas de referencia del §9 coinciden tic a tic con las soluciones de esos ejercicios. Variables con los nombres de Kurose (edición en español). Los tics se cuentan desde 1, como en los ejercicios.
 
 ## 1. Para qué sirve
 
@@ -22,7 +22,7 @@ Material de cada trío:
 - **Tarjetas de segmento** (§5), unas 20 por jugador.
 - **Hoja de estado de A** y **hoja de estado de B** (§10).
 - **Carta de escenario**, que solo ve el árbitro (§9).
-- **Registro del árbitro**: una plantilla de dos líneas de vida en blanco, como `../../S3.6/plantilla_tcp.pdf`.
+- **Registro del árbitro**: una plantilla de dos líneas de vida en blanco, como la plantilla de diagramas de secuencia TCP que se usa en los ejercicios.
 
 ## 3. Datos de partida (los conocen los dos)
 
@@ -48,9 +48,9 @@ Cada tic tiene cuatro pasos. El árbitro dice en voz alta «Tic *n*».
 3. **Decisión.** Cada jugador rellena en secreto **una tarjeta**: un segmento o «no envío». Las dos se entregan siempre, aunque estén en blanco, para que nadie sepa si el otro ha enviado algo por cómo se mueve.
 4. **Red.** El árbitro escribe el tic en las dos tarjetas, las copia en el registro y las guarda para entregarlas en el paso 1 del tic siguiente. Si la carta de escenario dice que una se pierde, se queda con ella y no dice nada.
 
-Este turno equivale al modelo del examen y de la web: el segmento sale al comienzo del tic *n*, llega a mitad del tic *n* y el receptor responde, como pronto, en el tic *n* + 1.
+Este turno equivale al modelo de los ejercicios y del examen: el segmento sale al comienzo del tic *n*, llega a mitad del tic *n* y el receptor responde, como pronto, en el tic *n* + 1.
 
-**Un segmento por tic y jugador**, como en la web. Si quieres enviar dos, van en tics consecutivos.
+**Un segmento por tic y jugador**, como en los ejercicios. Si quieres enviar dos, van en tics consecutivos.
 
 ## 5. La tarjeta de segmento
 
@@ -83,7 +83,7 @@ Valores iniciales: `UltimoByteEnviado = UltimoByteReconocido = 1023` y `VentRece
 - **B3. Aviso de lectura.** Cuando el árbitro dice «tu aplicación ha leído *x*–*y*», se pone `UltimoByteLeido = y`.
 - **B4. ACK retardado (CR3).** Si te llega un segmento en orden y no tenías ningún ACK pendiente, **no respondas en este tic**: apunta «ACK pendiente».
 - **B5. ACK acumulativo (CR4).** En el tic siguiente envías el ACK pendiente, con AN = `UltimoByteRecibido + 1` y la W de B2. Si mientras tanto ha llegado otro segmento, ese mismo ACK los reconoce los dos.
-- **B6. Actualización de ventana.** Si tu último ACK anunció **W = 0** y la aplicación libera sitio, en ese mismo tic envías un ACK con el mismo AN y la W nueva. Es lo que hace la web y lo que evita el bloqueo mientras no hay sonda (decisión abierta 1).
+- **B6. Actualización de ventana.** Si tu último ACK anunció **W = 0** y la aplicación libera sitio, en ese mismo tic envías un ACK con el mismo AN y la W nueva. Es lo que hacen los ejercicios y lo que evita el bloqueo mientras no hay sonda (decisión abierta 1).
 
 Valores iniciales: `UltimoByteRecibido = UltimoByteLeido = 1023`.
 
@@ -183,12 +183,12 @@ Los dos últimos resultados son los graves: la transferencia ha fallado y no hay
 ## 12. Fuera de esta versión
 
 - **Segmento de sondeo** de ventana cero: se dejará para la siguiente versión. Con la sonda, B6 podría dejar de ser una regla y la actualización de ventana podría perderse.
-- **Pérdidas y temporizador**: ya están en la versión web (escenarios P1–P5 y «Pérdidas al azar») con el modelo de `ModeloTcp`. Hay un temporizador único que, al vencer, retransmite solo el segmento más antiguo. B guarda lo que llega fuera de orden y envía un ACK duplicado inmediato (CR5) y un ACK inmediato al rellenar el hueco (CR6). Lo guardado fuera de orden no reduce la W, y la red puede perder también ACK. Como en los ejercicios de la web, la partida elige qué hace B con lo que llega fuera de orden: lo guarda (y A, al vencer, reenvía solo el más antiguo) o lo descarta (y A reenvía el más antiguo y después toda la cola, uno por tic). La retransmisión rápida (tercer ACK duplicado, Kurose fig. 3.37) es otra opción de la partida, activada por defecto; desactivada, el juego da los mismos tics que la web de ejercicios. Falta pasarlo a cartas para la versión en papel.
-- **Versión web**: prototipo del modo individual en `web/` (el alumno juega A o B y el programa hace de la otra parte, de la red y de la aplicación de B). Se abre `web/index.html` en el navegador y `node tests/pruebas_motor.js` comprueba el motor contra las trazas del Wooclap (extracto en `tests/trazas_gg33.json`). Hay dos simplificaciones para que un error no deje la partida bloqueada: B descarta lo que no cabe y responde con un ACK inmediato, y el temporizador de A lo gestiona el juego. Al final, la web muestra la misma tira del fichero y los mismos resultados del §11.
+- **Pérdidas y temporizador**: ya están en la versión web (escenarios P1–P5 y «Pérdidas al azar») con el modelo de los ejercicios. Hay un temporizador único que, al vencer, retransmite solo el segmento más antiguo. B guarda lo que llega fuera de orden y envía un ACK duplicado inmediato (CR5) y un ACK inmediato al rellenar el hueco (CR6). Lo guardado fuera de orden no reduce la W, y la red puede perder también ACK. Como en los ejercicios, la partida elige qué hace B con lo que llega fuera de orden: lo guarda (y A, al vencer, reenvía solo el más antiguo) o lo descarta (y A reenvía el más antiguo y después toda la cola, uno por tic). La retransmisión rápida (tercer ACK duplicado, Kurose fig. 3.37) es otra opción de la partida, activada por defecto; desactivada, el juego da los mismos tics que los ejercicios de control de flujo, que no la usan. Falta pasarlo a cartas para la versión en papel.
+- **Versión web**: prototipo del modo individual en `web/` (el alumno juega A o B y el programa hace de la otra parte, de la red y de la aplicación de B). Se abre `web/index.html` en el navegador y `node tests/pruebas_motor.js` comprueba el motor contra las soluciones de referencia (`tests/trazas_referencia.json`). Hay dos simplificaciones para que un error no deje la partida bloqueada: B descarta lo que no cabe y responde con un ACK inmediato, y el temporizador de A lo gestiona el juego. Al final, la versión web muestra la misma tira del fichero y los mismos resultados del §11.
 
 ## 13. Decisiones abiertas
 
-1. **B6, la actualización de ventana**: ¿es una regla, como en la web (recomendado mientras no haya sonda), o se deja a B que descubra que tiene que enviarla? En el segundo caso, si B no la envía la partida se bloquea, que es justo el problema de Kurose.
+1. **B6, la actualización de ventana**: ¿es una regla, como en los ejercicios (recomendado mientras no haya sonda), o se deja a B que descubra que tiene que enviarla? En el segundo caso, si B no la envía la partida se bloquea, que es justo el problema de Kurose.
 2. **ACK retardado desde N1** (recomendado, por coherencia con CR1–CR6 y el examen), o ACK inmediato en N1 para que la primera partida sea más fácil.
 3. **Quién hace de árbitro**: un alumno en cada trío (recomendado para probarlo en papel), o el profesor para varias parejas a la vez.
 4. **¿Sabe B el tamaño del fichero?** Recomendado que no, porque TCP no lo sabe.

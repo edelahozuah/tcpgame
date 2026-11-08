@@ -1,4 +1,4 @@
-// node tests/pruebas_motor.js  — comprueba el motor contra las trazas del Wooclap y algunos errores típicos.
+// node tests/pruebas_motor.js  — comprueba el motor contra las soluciones de referencia y algunos errores típicos.
 'use strict';
 const path = require('path');
 const fs = require('fs');
@@ -7,8 +7,8 @@ const { Partida, ESCENARIOS, P } = require('../web/motor.js');
 let fallos = 0;
 const ok = (cond, msg) => { if (!cond) { fallos++; console.log('  FALLO:', msg); } };
 
-// 1. Motor contra motor = trazas del modelo de la web
-const trazas = JSON.parse(fs.readFileSync(path.join(__dirname, 'trazas_gg33.json'), 'utf8')).apartados;
+// 1. Motor contra motor = soluciones de referencia de los ejercicios
+const trazas = JSON.parse(fs.readFileSync(path.join(__dirname, 'trazas_referencia.json'), 'utf8')).apartados;
 const mapa = { N1: 'inmediata', N2: 'lenta', N3: 'cero' };
 for (const [id, ap] of Object.entries(mapa)) {
   const p = Partida.simular(id);
@@ -176,7 +176,7 @@ for (const rol of ['A', 'B']) {
   ok(txt.startsWith('E_RETX_ANTES') && txt.includes('espera al tercero'), 'reenvío al segundo duplicado: ' + txt);
 }
 
-// 9. B descarta lo que llega fuera de orden y A retransmite la cola (como «descarta/cola» en la web)
+// 9. B descarta lo que llega fuera de orden y A retransmite la cola (como «descarta/cola» en los ejercicios)
 {
   const des = (id) => ({ ...ESCENARIOS[id], fuera: 'descarta' });
   const resumen = (esc) => {

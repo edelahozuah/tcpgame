@@ -1,7 +1,7 @@
 /* TCPGame: motor del juego (control de flujo y pérdidas, sin segmento de sondeo).
  *
- * Modelo de la web de ejercicios (Practica_Web/docs/22 §2, ModeloTcp) y del
- * Wooclap de GG33: un segmento por tic y lado; sale al comienzo del tic t,
+ * Mismo modelo que los ejercicios de secuencias TCP de la asignatura: un
+ * segmento por tic y lado; sale al comienzo del tic t,
  * llega a mitad del tic t y el receptor lo tiene en cuenta en el tic t + 1
  * (en el juego: lo ve al empezar el tic t + 1).
  *
@@ -9,7 +9,7 @@
  * tiene un búfer de 256 B y su aplicación lee cada segmento L tics después
  * de que le llegue en orden.
  *
- * Receptor (CR3–CR6, como ModeloTcp): ACK retardado un tic si llega un
+ * Receptor (CR3–CR6, como en los ejercicios): ACK retardado un tic si llega un
  * segmento en orden sin otro pendiente (CR3) y acumulativo si llega otro
  * (CR4); ACK duplicado inmediato si llega fuera de orden (CR5), que se
  * guarda; ACK inmediato al rellenar el hueco (CR6) y al recibir un
@@ -25,15 +25,15 @@
  * al vencer retransmite solo el más antiguo sin reconocer. Con la opción
  * `rapida` del escenario, además, retransmite el más antiguo al recibir el
  * tercer ACK duplicado (Kurose, fig. 3.37), sin esperar al temporizador (la
- * cuenta vuelve a 0 con un ACK que avanza y cuando vence el temporizador); la
- * web de ejercicios no la usa, porque sin control de congestión no la modela.
+ * cuenta vuelve a 0 con un ACK que avanza y cuando vence el temporizador); los
+ * ejercicios de control de flujo no la usan, porque solo aparece con control
+ * de congestión.
  *
- * Fuera de orden (opción `fuera` del escenario, como `fuera_de_orden` y
- * `retransmite` de ModeloTcp): 'almacena' (por defecto) → B guarda lo que
+ * Fuera de orden (opción `fuera` del escenario, como en los ejercicios): 'almacena' (por defecto) → B guarda lo que
  * llega fuera de orden y A, al vencer, retransmite solo el más antiguo;
  * 'descarta' → B lo descarta (con su ACK duplicado igualmente) y A, al
- * vencer, retransmite toda la cola, uno por tic (como en los ejercicios
- * de la web, donde «descarta» va siempre con «cola»).
+ * vencer, retransmite toda la cola, uno por tic (en los ejercicios,
+ * «descarta» va siempre con «retransmite toda la cola»).
  *
  * Pérdidas (las decide el escenario y ningún jugador las ve): segmentos de
  * datos por SN e intento, y ACK por orden de envío. Nunca se pierde una
