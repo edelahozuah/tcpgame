@@ -24,6 +24,8 @@ jobs:
         with:
           node-version: 22
       - run: node tests/pruebas_motor.js
+      - run: node tests/pruebas_congestion.js
+      - run: node tests/pruebas_doradas_congestion.js
 
   desplegar:
     needs: pruebas
