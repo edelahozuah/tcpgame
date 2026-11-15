@@ -1,0 +1,6345 @@
+{
+ "nota": "Cartas del grupo «congestión» (Reno) y sus trazas doradas, calculadas con el simulador de ejercicios de secuencias TCP de la asignatura (ModeloTcp::simular) por tests/generar_trazas_congestion.php; no se editan a mano. «juego»: la carta en el formato del motor (perdidas.datos por SN y número de envío; cc en MSS). «simulador»: el escenario que se le pasa al simulador. «segmentos»: la traza (cliente = A, servidor = B); vc, vc_valor, vc_texto, modo y umbral de un segmento son los del emisor al enviarlo: tras procesar los ACK que llegaron en el tic anterior y, si vence el temporizador en ese tic, ya con VC = 1. En los ACK de B salen también (el simulador aplica la congestión a los dos extremos), pero no significan nada. «estados»: foto de cada lado AL ACABAR cada tic (tic 0 = de partida), es decir, ya con los segmentos enviados en ese tic entregados y procesados (lo que A verá al empezar el tic siguiente); vence = tic al comienzo del cual vencería el temporizador. «fin»: tic en que B envía el ACK que reconoce el fichero entero.",
+ "apartados": {
+  "C1": {
+   "juego": {
+    "id": "C1",
+    "grupo": "congestion",
+    "nombre": "Conexión recién abierta, sin pérdidas",
+    "L": 0,
+    "rto": 6,
+    "segmentos": 8,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [],
+     "acks": []
+    },
+    "cc": {
+     "vc": 1,
+     "umbral": 16,
+     "modo": "AL"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C1",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 512,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [],
+    "congestion": {
+     "umbral_mss": 16,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 1,
+       "umbral_mss": 16,
+       "modo": "AL"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 1.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1088,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1216,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1344,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 10.5
+    },
+    {
+     "tic": 11,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 11.5
+    },
+    {
+     "tic": 11,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1472,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 11.5
+    },
+    {
+     "tic": 13,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1536,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 13.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1152,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 6,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1280,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 13,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 12,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 13,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 13,
+     "cliente": {
+      "vc": {
+       "n": 9,
+       "c": 0
+      },
+      "vc_valor": 9,
+      "vc_texto": "9",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 13
+  },
+  "C2": {
+   "juego": {
+    "id": "C2",
+    "grupo": "congestion",
+    "nombre": "Conexión recién abierta con un umbral bajo",
+    "L": 0,
+    "rto": 6,
+    "segmentos": 10,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [],
+     "acks": []
+    },
+    "cc": {
+     "vc": 1,
+     "umbral": 5,
+     "modo": "AL"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C2",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 640,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [],
+    "congestion": {
+     "umbral_mss": 5,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 1,
+       "umbral_mss": 5,
+       "modo": "AL"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 1.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1088,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1216,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1344,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 1
+     },
+     "vc_valor": 5.2,
+     "vc_texto": "5 + 1/5",
+     "modo": "EC",
+     "umbral": 5,
+     "llegada": 10.5
+    },
+    {
+     "tic": 11,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 1
+     },
+     "vc_valor": 5.2,
+     "vc_texto": "5 + 1/5",
+     "modo": "EC",
+     "umbral": 5,
+     "llegada": 11.5
+    },
+    {
+     "tic": 11,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1472,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 11.5
+    },
+    {
+     "tic": 12,
+     "lado": "cliente",
+     "sn": 1536,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 3
+     },
+     "vc_valor": 5.6,
+     "vc_texto": "5 + 3/5",
+     "modo": "EC",
+     "umbral": 5,
+     "llegada": 12.5
+    },
+    {
+     "tic": 13,
+     "lado": "cliente",
+     "sn": 1600,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 3
+     },
+     "vc_valor": 5.6,
+     "vc_texto": "5 + 3/5",
+     "modo": "EC",
+     "umbral": 5,
+     "llegada": 13.5
+    },
+    {
+     "tic": 13,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1600,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 13.5
+    },
+    {
+     "tic": 15,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1664,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 15.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1152,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 6,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1280,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 1
+      },
+      "vc_valor": 5.2,
+      "vc_texto": "5 + 1/5",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 1
+      },
+      "vc_valor": 5.2,
+      "vc_texto": "5 + 1/5",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 3
+      },
+      "vc_valor": 5.6,
+      "vc_texto": "5 + 3/5",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 13,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 12,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 3
+      },
+      "vc_valor": 5.6,
+      "vc_texto": "5 + 3/5",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1600,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 13,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1664,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 20
+     },
+     "servidor": {
+      "an_siguiente": 1664,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 15,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 14,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1664,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 20
+     },
+     "servidor": {
+      "an_siguiente": 1664,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 15,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 15,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 1
+      },
+      "vc_valor": 6.166666666666667,
+      "vc_texto": "6 + 1/6",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1664,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1664,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 15
+  },
+  "C3": {
+   "juego": {
+    "id": "C3",
+    "grupo": "congestion",
+    "nombre": "Se pierde un segmento en el arranque lento",
+    "L": 0,
+    "rto": 3,
+    "segmentos": 9,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [
+      {
+       "sn": 1472,
+       "envio": 1
+      }
+     ],
+     "acks": []
+    },
+    "cc": {
+     "vc": 1,
+     "umbral": 16,
+     "modo": "AL"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C3",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 3
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 576,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [
+     {
+      "lado": "cliente",
+      "segmento": 8,
+      "envio": 1
+     }
+    ],
+    "congestion": {
+     "umbral_mss": 16,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 1,
+       "umbral_mss": 16,
+       "modo": "AL"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 1.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1088,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1216,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1344,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 10.5
+    },
+    {
+     "tic": 11,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": true,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 11.5
+    },
+    {
+     "tic": 11,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1472,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 11.5
+    },
+    {
+     "tic": 12,
+     "lado": "cliente",
+     "sn": 1536,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 12.5
+    },
+    {
+     "tic": 13,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1472,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 13.5
+    },
+    {
+     "tic": 15,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": true,
+     "causa": "retx_temporizador",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 15.5
+    },
+    {
+     "tic": 16,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1600,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_hueco",
+     "cr": "CR6",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 16.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 4
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 4
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1152,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 6,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1280,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 15
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 12,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 15
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1536,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 13,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 1,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 15
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1536,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 14,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 1,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 15
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1536,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 15,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 4,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1600,
+      "w": 896,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 16,
+     "cliente": {
+      "vc": {
+       "n": 3,
+       "c": 0
+      },
+      "vc_valor": 3,
+      "vc_texto": "3",
+      "umbral": 4,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1600,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 16
+  },
+  "C4": {
+   "juego": {
+    "id": "C4",
+    "grupo": "congestion",
+    "nombre": "Búfer pequeño y la aplicación de B lee despacio",
+    "L": 4,
+    "rto": 6,
+    "segmentos": 8,
+    "bufer": 256,
+    "perdidas": {
+     "datos": [],
+     "acks": []
+    },
+    "cc": {
+     "vc": 1,
+     "umbral": 16,
+     "modo": "AL"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C4",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 256,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 4,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 512,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [],
+    "congestion": {
+     "umbral_mss": 16,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 1,
+       "umbral_mss": 16,
+       "modo": "AL"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 1.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1088,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 192,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 2,
+      "c": 0
+     },
+     "vc_valor": 2,
+     "vc_texto": "2",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1216,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 128,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1344,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 64,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 10.5
+    },
+    {
+     "tic": 12,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1408,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 128,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 12.5
+    },
+    {
+     "tic": 13,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 7,
+      "c": 0
+     },
+     "vc_valor": 7,
+     "vc_texto": "7",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 13.5
+    },
+    {
+     "tic": 14,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 7,
+      "c": 0
+     },
+     "vc_valor": 7,
+     "vc_texto": "7",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 14.5
+    },
+    {
+     "tic": 15,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1536,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 128,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 16,
+     "llegada": 15.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 256,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 256,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 256,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 192,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 256,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 192,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 0,
+      "w_otro": 192,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 192,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 64,
+      "w_otro": 192,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1152,
+      "w": 128,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": 6,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 2,
+       "c": 0
+      },
+      "vc_valor": 2,
+      "vc_texto": "2",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 128,
+      "w_otro": 192,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 0,
+      "w_otro": 128,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 128,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 64,
+      "w_otro": 128,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1280,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 128,
+      "w_otro": 128,
+      "vence": 13
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 0,
+      "sin_leer": 256,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 0,
+      "w_otro": 64,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 64,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": 12,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 64,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": 12,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 12,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 0,
+      "w_otro": 128,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 128,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 13,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 64,
+      "w_otro": 128,
+      "vence": 19
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 128,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": 15,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 14,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 128,
+      "w_otro": 128,
+      "vence": 19
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 64,
+      "sin_leer": 192,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 15,
+     "cliente": {
+      "vc": {
+       "n": 9,
+       "c": 0
+      },
+      "vc_valor": 9,
+      "vc_texto": "9",
+      "umbral": 16,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 0,
+      "w_otro": 128,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 128,
+      "sin_leer": 128,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 15
+  },
+  "C5": {
+   "juego": {
+    "id": "C5",
+    "grupo": "congestion",
+    "nombre": "A mitad de conexión, sin pérdidas",
+    "L": 0,
+    "rto": 6,
+    "segmentos": 10,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [],
+     "acks": []
+    },
+    "cc": {
+     "vc": 4,
+     "umbral": 4,
+     "modo": "EC"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C5",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 640,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [],
+    "congestion": {
+     "umbral_mss": 4,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 4,
+       "umbral_mss": 4,
+       "modo": "EC"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 1.5
+    },
+    {
+     "tic": 2,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 2.5
+    },
+    {
+     "tic": 3,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 3.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1152,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 2
+     },
+     "vc_valor": 4.5,
+     "vc_texto": "4 + 2/4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 2
+     },
+     "vc_valor": 4.5,
+     "vc_texto": "4 + 2/4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 5.5
+    },
+    {
+     "tic": 5,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1280,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 0
+     },
+     "vc_valor": 5,
+     "vc_texto": "5",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 0
+     },
+     "vc_valor": 5,
+     "vc_texto": "5",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 7.5
+    },
+    {
+     "tic": 7,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1408,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 2
+     },
+     "vc_valor": 5.4,
+     "vc_texto": "5 + 2/5",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1536,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 2
+     },
+     "vc_valor": 5.4,
+     "vc_texto": "5 + 2/5",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1536,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "cliente",
+     "sn": 1600,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 5,
+      "c": 4
+     },
+     "vc_valor": 5.8,
+     "vc_texto": "5 + 4/5",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 10.5
+    },
+    {
+     "tic": 11,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1664,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 11.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1088,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 3,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1152,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 2
+      },
+      "vc_valor": 4.5,
+      "vc_texto": "4 + 2/4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1216,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 5,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 2
+      },
+      "vc_valor": 4.5,
+      "vc_texto": "4 + 2/4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 10
+     },
+     "servidor": {
+      "an_siguiente": 1280,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 0
+      },
+      "vc_valor": 5,
+      "vc_texto": "5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 7,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 0
+      },
+      "vc_valor": 5,
+      "vc_texto": "5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 2
+      },
+      "vc_valor": 5.4,
+      "vc_texto": "5 + 2/5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 14
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 2
+      },
+      "vc_valor": 5.4,
+      "vc_texto": "5 + 2/5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 14
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 4
+      },
+      "vc_valor": 5.8,
+      "vc_texto": "5 + 4/5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1600,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1600,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 4
+      },
+      "vc_valor": 5.8,
+      "vc_texto": "5 + 4/5",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1664,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1664,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 1
+      },
+      "vc_valor": 6.166666666666667,
+      "vc_texto": "6 + 1/6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1664,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1664,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 11
+  },
+  "C6": {
+   "juego": {
+    "id": "C6",
+    "grupo": "congestion",
+    "nombre": "A mitad de conexión, se pierde un segmento",
+    "L": 0,
+    "rto": 6,
+    "segmentos": 8,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [
+      {
+       "sn": 1024,
+       "envio": 1
+      }
+     ],
+     "acks": []
+    },
+    "cc": {
+     "vc": 8,
+     "umbral": 6,
+     "modo": "EC"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C6",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 512,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [
+     {
+      "lado": "cliente",
+      "segmento": 1,
+      "envio": 1
+     }
+    ],
+    "congestion": {
+     "umbral_mss": 6,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 8,
+       "umbral_mss": 6,
+       "modo": "EC"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": true,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "EC",
+     "umbral": 6,
+     "llegada": 1.5
+    },
+    {
+     "tic": 2,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "EC",
+     "umbral": 6,
+     "llegada": 2.5
+    },
+    {
+     "tic": 3,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "EC",
+     "umbral": 6,
+     "llegada": 3.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "EC",
+     "umbral": 6,
+     "llegada": 4.5
+    },
+    {
+     "tic": 4,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "EC",
+     "umbral": 6,
+     "llegada": 5.5
+    },
+    {
+     "tic": 5,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": true,
+     "causa": "retx_rapida",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 7,
+      "c": 0
+     },
+     "vc_valor": 7,
+     "vc_texto": "7",
+     "modo": "RR",
+     "umbral": 4,
+     "llegada": 6.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "RR",
+     "umbral": 4,
+     "llegada": 7.5
+    },
+    {
+     "tic": 7,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1344,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_hueco",
+     "cr": "CR6",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 4,
+      "c": 0
+     },
+     "vc_valor": 4,
+     "vc_texto": "4",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1472,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_acumulativo",
+     "cr": "CR4",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 9.5
+    },
+    {
+     "tic": 11,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1536,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_retardado",
+     "cr": "CR3",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 6,
+     "llegada": 11.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 6,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 6,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 6,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 6,
+      "modo": "EC",
+      "dup_acks": 1,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 192,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 6,
+      "modo": "EC",
+      "dup_acks": 2,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 256,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 4,
+      "modo": "RR",
+      "dup_acks": 3,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 320,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 4,
+      "modo": "RR",
+      "dup_acks": 4,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 320,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1344,
+      "w": 704,
+      "sin_leer": 320,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 14
+     },
+     "servidor": {
+      "an_siguiente": 1408,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 9,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 0
+      },
+      "vc_valor": 4,
+      "vc_texto": "4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 14
+     },
+     "servidor": {
+      "an_siguiente": 1472,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 2
+      },
+      "vc_valor": 4.5,
+      "vc_texto": "4 + 2/4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 960,
+      "sin_leer": 64,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 2
+      },
+      "vc_valor": 4.5,
+      "vc_texto": "4 + 2/4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 16
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": 11,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 4,
+       "c": 3
+      },
+      "vc_valor": 4.75,
+      "vc_texto": "4 + 3/4",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 11
+  },
+  "C7": {
+   "juego": {
+    "id": "C7",
+    "grupo": "congestion",
+    "nombre": "A mitad de conexión, se pierde un segmento dos veces",
+    "L": 0,
+    "rto": 6,
+    "segmentos": 8,
+    "bufer": 1024,
+    "perdidas": {
+     "datos": [
+      {
+       "sn": 1024,
+       "envio": 1
+      },
+      {
+       "sn": 1024,
+       "envio": 2
+      }
+     ],
+     "acks": []
+    },
+    "cc": {
+     "vc": 6,
+     "umbral": 4,
+     "modo": "EC"
+    }
+   },
+   "simulador": {
+    "esc.familia": "SECUENCIAS_TCP",
+    "esc.codigo": "TCPGame/C7",
+    "equipos": {
+     "cliente": {
+      "nombre": "A",
+      "mss": 64,
+      "w": 512,
+      "isn": 1024
+     },
+     "servidor": {
+      "nombre": "B",
+      "mss": 64,
+      "w": 1024,
+      "isn": 2048
+     }
+    },
+    "tiempo": {
+     "propagacion": 0.5,
+     "ack_retardado": 1,
+     "rto": 6
+    },
+    "politicas": {
+     "fuera_de_orden": "almacena",
+     "retransmite": "antiguo",
+     "lectura": 0,
+     "datos_en_ack_apertura": false
+    },
+    "fases": {
+     "apertura": false,
+     "cierre": false,
+     "cierra": "cliente"
+    },
+    "envios": [
+     {
+      "lado": "cliente",
+      "octetos": 512,
+      "desde_tic": 1
+     }
+    ],
+    "perdidas": [
+     {
+      "lado": "cliente",
+      "segmento": 1,
+      "envio": 1
+     },
+     {
+      "lado": "cliente",
+      "segmento": 1,
+      "envio": 2
+     }
+    ],
+    "congestion": {
+     "umbral_mss": 4,
+     "vc_inicial_mss": 1,
+     "lados": {
+      "cliente": {
+       "vc_mss": 6,
+       "umbral_mss": 4,
+       "modo": "EC"
+      }
+     }
+    },
+    "http": null,
+    "modo": "dibujar",
+    "campos": [
+     "sn",
+     "an",
+     "flags",
+     "w",
+     "datos",
+     "vc",
+     "modo_cc",
+     "umbral"
+    ],
+    "nivel": 3
+   },
+   "segmentos": [
+    {
+     "tic": 1,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": true,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 1.5
+    },
+    {
+     "tic": 2,
+     "lado": "cliente",
+     "sn": 1088,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 2.5
+    },
+    {
+     "tic": 3,
+     "lado": "cliente",
+     "sn": 1152,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 3.5
+    },
+    {
+     "tic": 3,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 3.5
+    },
+    {
+     "tic": 4,
+     "lado": "cliente",
+     "sn": 1216,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 4.5
+    },
+    {
+     "tic": 4,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 4.5
+    },
+    {
+     "tic": 5,
+     "lado": "cliente",
+     "sn": 1280,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "EC",
+     "umbral": 4,
+     "llegada": 5.5
+    },
+    {
+     "tic": 5,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 5.5
+    },
+    {
+     "tic": 6,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": true,
+     "retransmision": true,
+     "causa": "retx_rapida",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 6,
+      "c": 0
+     },
+     "vc_valor": 6,
+     "vc_texto": "6",
+     "modo": "RR",
+     "umbral": 3,
+     "llegada": 6.5
+    },
+    {
+     "tic": 6,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 6.5
+    },
+    {
+     "tic": 7,
+     "lado": "cliente",
+     "sn": 1344,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 7,
+      "c": 0
+     },
+     "vc_valor": 7,
+     "vc_texto": "7",
+     "modo": "RR",
+     "umbral": 3,
+     "llegada": 7.5
+    },
+    {
+     "tic": 8,
+     "lado": "cliente",
+     "sn": 1408,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 7,
+      "c": 0
+     },
+     "vc_valor": 7,
+     "vc_texto": "7",
+     "modo": "RR",
+     "umbral": 3,
+     "llegada": 8.5
+    },
+    {
+     "tic": 8,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 8.5
+    },
+    {
+     "tic": 9,
+     "lado": "cliente",
+     "sn": 1472,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "datos",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 8,
+      "c": 0
+     },
+     "vc_valor": 8,
+     "vc_texto": "8",
+     "modo": "RR",
+     "umbral": 3,
+     "llegada": 9.5
+    },
+    {
+     "tic": 9,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 9.5
+    },
+    {
+     "tic": 10,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1024,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_duplicado",
+     "cr": "CR5",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 10.5
+    },
+    {
+     "tic": 12,
+     "lado": "cliente",
+     "sn": 1024,
+     "an": 2048,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 512,
+     "mss": null,
+     "datos": 64,
+     "perdido": false,
+     "retransmision": true,
+     "causa": "retx_temporizador",
+     "cr": null,
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 5,
+     "llegada": 12.5
+    },
+    {
+     "tic": 13,
+     "lado": "servidor",
+     "sn": 2048,
+     "an": 1536,
+     "syn": 0,
+     "ack": 1,
+     "fin": 0,
+     "w": 1024,
+     "mss": null,
+     "datos": 0,
+     "perdido": false,
+     "retransmision": false,
+     "causa": "ack_hueco",
+     "cr": "CR6",
+     "mensaje": null,
+     "vc": {
+      "n": 1,
+      "c": 0
+     },
+     "vc_valor": 1,
+     "vc_texto": "1",
+     "modo": "AL",
+     "umbral": 4,
+     "llegada": 13.5
+    }
+   ],
+   "estados": [
+    {
+     "tic": 0,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1024,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 1,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1088,
+      "sin_confirmar": 64,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 2,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1152,
+      "sin_confirmar": 128,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 3,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 1,
+      "sn_siguiente": 1216,
+      "sin_confirmar": 192,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 4,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 4,
+      "modo": "EC",
+      "dup_acks": 2,
+      "sn_siguiente": 1280,
+      "sin_confirmar": 256,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 5,
+     "cliente": {
+      "vc": {
+       "n": 6,
+       "c": 0
+      },
+      "vc_valor": 6,
+      "vc_texto": "6",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 3,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 320,
+      "w_otro": 1024,
+      "vence": 7
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 6,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 4,
+      "sn_siguiente": 1344,
+      "sin_confirmar": 320,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 7,
+     "cliente": {
+      "vc": {
+       "n": 7,
+       "c": 0
+      },
+      "vc_valor": 7,
+      "vc_texto": "7",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 4,
+      "sn_siguiente": 1408,
+      "sin_confirmar": 384,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       },
+       {
+        "sn": 1344,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 8,
+     "cliente": {
+      "vc": {
+       "n": 8,
+       "c": 0
+      },
+      "vc_valor": 8,
+      "vc_texto": "8",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 5,
+      "sn_siguiente": 1472,
+      "sin_confirmar": 448,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       },
+       {
+        "sn": 1344,
+        "octetos": 64
+       },
+       {
+        "sn": 1408,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 9,
+     "cliente": {
+      "vc": {
+       "n": 9,
+       "c": 0
+      },
+      "vc_valor": 9,
+      "vc_texto": "9",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 6,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 512,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       },
+       {
+        "sn": 1344,
+        "octetos": 64
+       },
+       {
+        "sn": 1408,
+        "octetos": 64
+       },
+       {
+        "sn": 1472,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 10,
+     "cliente": {
+      "vc": {
+       "n": 10,
+       "c": 0
+      },
+      "vc_valor": 10,
+      "vc_texto": "10",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 7,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 512,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       },
+       {
+        "sn": 1344,
+        "octetos": 64
+       },
+       {
+        "sn": 1408,
+        "octetos": 64
+       },
+       {
+        "sn": 1472,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 11,
+     "cliente": {
+      "vc": {
+       "n": 10,
+       "c": 0
+      },
+      "vc_valor": 10,
+      "vc_texto": "10",
+      "umbral": 3,
+      "modo": "RR",
+      "dup_acks": 7,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 512,
+      "w_otro": 1024,
+      "vence": 12
+     },
+     "servidor": {
+      "an_siguiente": 1024,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [
+       {
+        "sn": 1088,
+        "octetos": 64
+       },
+       {
+        "sn": 1152,
+        "octetos": 64
+       },
+       {
+        "sn": 1216,
+        "octetos": 64
+       },
+       {
+        "sn": 1280,
+        "octetos": 64
+       },
+       {
+        "sn": 1344,
+        "octetos": 64
+       },
+       {
+        "sn": 1408,
+        "octetos": 64
+       },
+       {
+        "sn": 1472,
+        "octetos": 64
+       }
+      ],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    },
+    {
+     "tic": 12,
+     "cliente": {
+      "vc": {
+       "n": 1,
+       "c": 0
+      },
+      "vc_valor": 1,
+      "vc_texto": "1",
+      "umbral": 5,
+      "modo": "AL",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 512,
+      "w_otro": 1024,
+      "vence": 18
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 512,
+      "sin_leer": 512,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 1
+     }
+    },
+    {
+     "tic": 13,
+     "cliente": {
+      "vc": {
+       "n": 5,
+       "c": 4
+      },
+      "vc_valor": 5.8,
+      "vc_texto": "5 + 4/5",
+      "umbral": 5,
+      "modo": "EC",
+      "dup_acks": 0,
+      "sn_siguiente": 1536,
+      "sin_confirmar": 0,
+      "w_otro": 1024,
+      "vence": null
+     },
+     "servidor": {
+      "an_siguiente": 1536,
+      "w": 1024,
+      "sin_leer": 0,
+      "fuera_de_orden": [],
+      "ack_retardado": null,
+      "acks_debidos": 0
+     }
+    }
+   ],
+   "fin": 13
+  }
+ }
+}
