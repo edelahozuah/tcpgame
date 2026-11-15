@@ -87,7 +87,7 @@
     C4: { id: 'C4', grupo: 'congestion', nombre: 'Búfer pequeño y la aplicación de B lee despacio', L: 4, rto: 6, segmentos: 8, bufer: 256, perdidas: SIN, cc: { vc: 1, umbral: 16, modo: 'AL' }, ref: 15 },
     C5: { id: 'C5', grupo: 'congestion', nombre: 'A mitad de conexión, sin pérdidas', L: 0, rto: 6, segmentos: 10, bufer: 1024, perdidas: SIN, cc: { vc: 4, umbral: 4, modo: 'EC' }, ref: 11 },
     C6: { id: 'C6', grupo: 'congestion', nombre: 'A mitad de conexión, se pierde un segmento', L: 0, rto: 6, segmentos: 8, bufer: 1024, perdidas: { datos: [{ sn: 1024, envio: 1 }], acks: [] }, cc: { vc: 8, umbral: 6, modo: 'EC' }, ref: 11 },
-    C7: { id: 'C7', grupo: 'congestion', nombre: 'A mitad de conexión, se pierde un segmento dos veces', L: 0, rto: 6, segmentos: 8, bufer: 1024, perdidas: { datos: [{ sn: 1024, envio: 1 }, { sn: 1024, envio: 2 }], acks: [] }, cc: { vc: 6, umbral: 4, modo: 'EC' }, ref: 13 },
+    C7: { id: 'C7', grupo: 'congestion', nombre: 'A mitad de conexión, se pierde un segmento y el temporizador es corto', L: 0, rto: 4, segmentos: 8, bufer: 1024, perdidas: { datos: [{ sn: 1024, envio: 1 }], acks: [] }, cc: { vc: 4, umbral: 4, modo: 'EC' }, ref: 11 },
   };
 
   /* ---------- Control de congestión (VC en MSS) ---------- */

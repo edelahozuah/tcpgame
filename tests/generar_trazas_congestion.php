@@ -184,12 +184,13 @@ $cartas = [
     ['id' => 'C6', 'grupo' => 'congestion', 'nombre' => 'A mitad de conexión, se pierde un segmento',
      'L' => 0, 'rto' => 6, 'segmentos' => 8, 'bufer' => 1024, 'perdidas' => ['datos' => [['sn' => 1024, 'envio' => 1]], 'acks' => []],
      'cc' => ['vc' => 8, 'umbral' => 6, 'modo' => 'EC']],
-    // GG3.5 · Como C6, pero se pierde también la retransmisión rápida: la VC
-    // sigue inflándose en RR hasta 10 y vence el temporizador → umbral 5,
-    // VC = 1, AL.
-    ['id' => 'C7', 'grupo' => 'congestion', 'nombre' => 'A mitad de conexión, se pierde un segmento dos veces',
-     'L' => 0, 'rto' => 6, 'segmentos' => 8, 'bufer' => 1024, 'perdidas' => ['datos' => [['sn' => 1024, 'envio' => 1], ['sn' => 1024, 'envio' => 2]], 'acks' => []],
-     'cc' => ['vc' => 6, 'umbral' => 4, 'modo' => 'EC']],
+    // GG3.5 · Vence el temporizador en EC, sin pasar por RR: el temporizador
+    // es corto y vence con un solo ACK duplicado → umbral = 4/2 = 2, VC = 1,
+    // AL. El ACK que rellena el hueco reconoce 4 segmentos y cruza el umbral
+    // por tramos (1 → 2 en AL, luego EC → 3 + 1/3).
+    ['id' => 'C7', 'grupo' => 'congestion', 'nombre' => 'A mitad de conexión, se pierde un segmento y el temporizador es corto',
+     'L' => 0, 'rto' => 4, 'segmentos' => 8, 'bufer' => 1024, 'perdidas' => ['datos' => [['sn' => 1024, 'envio' => 1]], 'acks' => []],
+     'cc' => ['vc' => 4, 'umbral' => 4, 'modo' => 'EC']],
 ];
 
 $salida = [];
