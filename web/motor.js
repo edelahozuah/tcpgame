@@ -5,9 +5,10 @@
  * llega a mitad del tic t y el receptor lo tiene en cuenta en el tic t + 1
  * (en el juego: lo ve al empezar el tic t + 1).
  *
- * El cliente A envía 384 B (1024–1407) en segmentos de 64 B; el servidor B
- * tiene un búfer de 256 B y su aplicación lee cada segmento L tics después
- * de que le llegue en orden.
+ * El cliente A envía un fichero en segmentos de 64 B (por defecto 6, 384 B,
+ * 1024–1407) y el servidor B tiene un búfer (por defecto 256 B); su aplicación
+ * lee cada segmento L tics después de que le llegue en orden. Cada escenario
+ * puede llevar `segmentos` y `bufer`; la partida los expone en `par`.
  *
  * Receptor (CR3–CR6, como en los ejercicios): ACK retardado un tic si llega un
  * segmento en orden sin otro pendiente (CR3) y acumulativo si llega otro
@@ -44,6 +45,7 @@
 (function (raiz) {
   'use strict';
 
+  // FIN_A y BUFER son los valores por defecto; cada partida usa los suyos (`partida.par`).
   const P = { MSS: 64, SN_A: 1024, FIN_A: 1408, SN_B: 2048, BUFER: 256, W_A: 512, MAX_TICS: 40 };
   const SIN = { datos: [], acks: [] };
 
@@ -59,11 +61,11 @@
   };
 
   /** Escenario con pérdidas al azar: lectura 0 o 2, una o dos pérdidas. */
-  function escenarioAzar(azar) {
+  function escenarioAzar(azar, segmentos) {
     const r = azar || Math.random, elegir = (xs) => xs[Math.floor(r() * xs.length)];
     const L = elegir([0, 0, 2]), n = elegir([1, 2]);
     const datos = [], acks = [];
-    const sns = [1024, 1088, 1152, 1216, 1280, 1344];
+    const sns = Array.from({ length: segmentos || 6 }, (_, k) => P.SN_A + k * P.MSS);
     for (let i = 0; i < n; i++) {
       if (r() < 0.55) {
         const sn = elegir(sns);
@@ -84,6 +86,8 @@
       this.esc = typeof esc === 'string' ? ESCENARIOS[esc] : esc;
       if (!this.esc) throw new Error('Escenario desconocido: ' + esc);
       this.rol = rol || null;
+      const segmentos = this.esc.segmentos || 6;
+      this.par = { segmentos, bufer: this.esc.bufer || P.BUFER, fin: P.SN_A + segmentos * P.MSS };   // fin = AN del ACK final
       this.tic = 0;
       this.registro = [];   // segmentos {tic, lado, sn, an, w, datos, perdido, descartado, motivo, retx}
       this.lecturas = [];   // {tic, ini, fin}: el aviso llega al comienzo de ese tic
@@ -91,13 +95,13 @@
       this.fin = null;      // {tic, motivo}
       this.intentos = {};   // sn → veces enviado
       this.nAcks = 0;
-      this.A = { sig: P.SN_A, an: P.SN_A, w: P.BUFER, vence: null, retxDebida: null, dups: 0, cola: null, colaFin: null };
-      this.B = { rec: P.SN_A - 1, leido: P.SN_A - 1, porLeer: [], fuera: [], anAnunciado: P.SN_A, wAnunciada: P.BUFER,
+      this.A = { sig: P.SN_A, an: P.SN_A, w: this.par.bufer, vence: null, retxDebida: null, dups: 0, cola: null, colaFin: null };
+      this.B = { rec: P.SN_A - 1, leido: P.SN_A - 1, porLeer: [], fuera: [], anAnunciado: P.SN_A, wAnunciada: this.par.bufer,
                  pendienteDesde: null, ackDebido: null };
       this.eventos = { A: [], B: [] };
     }
 
-    wB() { return P.BUFER - (this.B.rec - this.B.leido); }
+    wB() { return this.par.bufer - (this.B.rec - this.B.leido); }
 
     /** Estado real de cada lado, tal como queda tras los eventos del tic. */
     foto() {
@@ -120,10 +124,10 @@
         evB.push({ tipo: 'descarte', seg: s, motivo: 'duplicado' });
         return;
       }
-      if (fin > B.leido + P.BUFER) {
+      if (fin > B.leido + this.par.bufer) {
         s.descartado = true; s.motivo = 'no_cabe';
         B.ackDebido = B.ackDebido || 'ack_no_cabe';
-        evB.push({ tipo: 'descarte', seg: s, motivo: 'no_cabe', libre: B.leido + P.BUFER - B.rec });
+        evB.push({ tipo: 'descarte', seg: s, motivo: 'no_cabe', libre: B.leido + this.par.bufer - B.rec });
         return;
       }
       if (s.sn > B.rec + 1 && this.esc.fuera === 'descarta') {
@@ -183,7 +187,7 @@
         } else {
           evA.push({ tipo: 'ack_viejo', seg: s });
         }
-        if (A.an >= P.FIN_A && !this.fin) this.fin = { tic: s.tic, motivo: 'completo' };
+        if (A.an >= this.par.fin && !this.fin) this.fin = { tic: s.tic, motivo: 'completo' };
       }
       // Un ACK duplicado/inmediato cubre el retardado que hubiera pendiente.
       if (B.ackDebido) B.pendienteDesde = null;
@@ -220,16 +224,16 @@
       if (lado === 'A') {
         const A = this.A, borde = A.an + A.w, vuelo = A.sig - A.an;
         const cola = A.cola !== null && A.cola < A.colaFin ? A.cola : null;
-        const info = { vuelo, w: A.w, sig: A.sig, an: A.an, borde, dups: A.dups, rapida: !!this.esc.rapida, cola };
+        const info = { vuelo, w: A.w, sig: A.sig, an: A.an, borde, dups: A.dups, rapida: !!this.esc.rapida, cola, fin: this.par.fin, bufer: this.par.bufer };
         if (A.retxDebida) return { accion: { sn: A.an, an: P.SN_B, w: P.W_A, datos: P.MSS }, causa: A.retxDebida, info };
         if (cola !== null) return { accion: { sn: cola, an: P.SN_B, w: P.W_A, datos: P.MSS }, causa: 'retx_cola', info };
-        if (A.sig >= P.FIN_A) return { accion: null, causa: 'todo_enviado', info };
+        if (A.sig >= this.par.fin) return { accion: null, causa: 'todo_enviado', info };
         if (A.sig + P.MSS <= borde) return { accion: { sn: A.sig, an: P.SN_B, w: P.W_A, datos: P.MSS }, causa: 'cabe', info };
         return { accion: null, causa: A.w === 0 ? 'ventana_cero' : 'ventana_llena', info };
       }
       const B = this.B, an = B.rec + 1, w = this.wB();
       const info = { an, w, rec: B.rec, leido: B.leido, desde: B.pendienteDesde, wAnunciada: B.wAnunciada, fuera: B.fuera.map((f) => ({ ...f })),
-                     descarta: this.esc.fuera === 'descarta' };
+                     descarta: this.esc.fuera === 'descarta', fin: this.par.fin, bufer: this.par.bufer };
       const ack = { sn: P.SN_B, an, w, datos: 0 };
       if (B.ackDebido) return { accion: ack, causa: B.ackDebido, info };
       if (B.pendienteDesde !== null && B.pendienteDesde < t) {
@@ -339,7 +343,7 @@
     }
     if (acc.sn < i.an) return { ok: false, codigo: 'E_SN', texto: `El ${acc.sn} ya estaba reconocido (el último AN fue ${i.an}).` };
     if (!e) {
-      if (esp.causa === 'todo_enviado') return { ok: false, codigo: 'E_NO_QUEDAN', texto: 'Ya no quedaban datos nuevos que enviar (el fichero acaba en el 1407).' };
+      if (esp.causa === 'todo_enviado') return { ok: false, codigo: 'E_NO_QUEDAN', texto: `Ya no quedaban datos nuevos que enviar (el fichero acaba en el ${i.fin - 1}).` };
       return { ok: false, codigo: 'E_VENTANA', texto: `Enviaste fuera de la ventana. ${cuenta} B no te había asegurado sitio para ese segmento: puede que quepa o puede que no, pero tú no puedes saberlo.` };
     }
     if (acc.sn !== e.sn) return { ok: false, codigo: 'E_SN', texto: `El SN tenía que ser ${e.sn} (el siguiente octeto que no habías enviado); pusiste ${acc.sn}.` };
@@ -350,7 +354,7 @@
 
   function evaluarB(acc, esp) {
     const i = esp.info, e = esp.accion;
-    const cuentaW = `W = 256 − (${i.rec} − ${i.leido}) = ${i.w}.`;
+    const cuentaW = `W = ${i.bufer} − (${i.rec} − ${i.leido}) = ${i.w}.`;
     const por = {
       ack_retardado: `Tenías un ACK pendiente desde el tic ${i.desde} y no ha llegado otro en orden: ya no se espera más (CR3).`,
       ack_acumulativo: `Tenías un ACK pendiente desde el tic ${i.desde} y ha llegado otro: un ACK reconoce los dos (CR4).`,
@@ -377,9 +381,9 @@
     if (acc.an !== e.an) errores.push(`el AN es el siguiente octeto que esperas en orden: ${i.rec} + 1 = ${e.an} (pusiste ${acc.an})`);
     if (acc.w !== e.w) {
       let pista = '';
-      if (acc.w === 256) pista = ' No descuentas lo que tienes sin leer.';
+      if (acc.w === i.bufer) pista = ' No descuentas lo que tienes sin leer.';
       else if (i.fuera && i.fuera.length) pista = ' Lo guardado fuera de orden no se descuenta: el borde derecho de la ventana no retrocede.';
-      else if (acc.w === 256 - (i.rec - (P.SN_A - 1))) pista = ' Descuentas también lo que tu aplicación ya ha leído.';
+      else if (acc.w === i.bufer - (i.rec - (P.SN_A - 1))) pista = ' Descuentas también lo que tu aplicación ya ha leído.';
       errores.push(`${cuentaW}${pista} (pusiste ${acc.w})`);
     }
     if (errores.length) return { ok: false, codigo: acc.an !== e.an ? 'E_AN' : 'E_W', texto: 'ACK en su tic, pero ' + errores.join('; ') + '.' };

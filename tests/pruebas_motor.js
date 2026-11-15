@@ -209,5 +209,32 @@ for (const rol of ['A', 'B']) {
   ok(cods[0] === '9:E_SIN_RETX_COLA', 'falta E_SIN_RETX_COLA');
 }
 
+// 10. Fichero y búfer parametrizados: 10 segmentos y búfer de 512 B, con y sin pérdida posterior al sexto segmento
+{
+  const casos = {
+    'N2 10 seg/512': { ...ESCENARIOS.N2, segmentos: 10, bufer: 512 },
+    'pérdida del 8.º': { ...ESCENARIOS.N2, segmentos: 10, bufer: 512, perdidas: { datos: [{ sn: 1024 + 7 * 64, envio: 1 }], acks: [] } },
+  };
+  for (const [nombre, esc] of Object.entries(casos)) {
+    const s = Partida.simular(esc);
+    ok(s.par.fin === 1024 + 640 && s.par.bufer === 512, `${nombre}: par ${JSON.stringify(s.par)}`);
+    ok(s.fin.motivo === 'completo' && s.B.rec === s.par.fin - 1, `${nombre}: simular ${JSON.stringify(s.fin)}`);
+    for (const rol of ['A', 'B']) {
+      const p = new Partida(esc, rol);
+      let textos = '';
+      while (p.empezarTic()) {
+        const f = p.historia[p.historia.length - 1].foto[rol];
+        const ev = p.cerrarTic(p.decisionTCP(rol).accion, f);
+        ok(ev.ok, `${nombre}/${rol} tic ${p.tic}: ${JSON.stringify(ev)}`);
+        textos += ev.decision.texto + ' ';
+      }
+      ok(p.fin.motivo === 'completo' && p.B.rec === p.par.fin - 1, `${nombre}/${rol}: fin ${JSON.stringify(p.fin)}`);
+      // 1407 y 1408 pueden salir como valores reales a mitad de la transferencia; lo que no puede salir son los literales del caso por defecto
+      ok(!/acaba en el 1407|AN = 1408|W = 256/.test(textos), `${nombre}/${rol}: textos con literales del fichero por defecto`);
+    }
+    console.log(`${nombre}: fin ${s.fin.tic}, AN final ${s.par.fin}`);
+  }
+}
+
 console.log(fallos ? `\n${fallos} fallo(s)` : '\nTodo bien');
 process.exit(fallos ? 1 : 0);

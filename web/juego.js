@@ -5,20 +5,24 @@
   const app = document.getElementById('app');
 
   const NOMBRE = { A: 'Cliente A · emisor', B: 'Servidor B · receptor' };
-  const CAMPOS = {
+  // Parámetros por defecto (pantalla de inicio, donde aún no hay partida); en juego se usa `partida.par`.
+  const PAR_DEF = { segmentos: (P.FIN_A - P.SN_A) / P.MSS, bufer: P.BUFER, fin: P.FIN_A };
+  const par = () => (partida ? partida.par : PAR_DEF);
+  const camposDe = (q) => ({
     A: [['ultimoByteEnviado', 'UltimoByteEnviado', 'último octeto que has enviado',
          'El número del último octeto de datos <b>nuevos</b> que has metido en la red. Un segmento con SN = 1152 y 64 B lleva del 1152 al 1215, así que después de enviarlo vale 1215. Una retransmisión no lo cambia, porque esos octetos ya estaban enviados. Antes de enviar nada vale 1023, el octeto anterior al primero.'],
         ['ultimoByteReconocido', 'UltimoByteReconocido', 'AN del último ACK − 1',
          'El último octeto que B te ha confirmado. El AN de un ACK es el <b>siguiente</b> octeto que B espera, así que lo confirmado llega hasta AN − 1: con AN = 1088, B tiene hasta el 1087. Un ACK duplicado no lo cambia. Antes del primer ACK vale 1023.<br>UltimoByteEnviado − UltimoByteReconocido son los octetos que tienes en vuelo: enviados y aún sin confirmar.'],
         ['ventRecepcion', 'VentRecepcion', 'W del último ACK',
-         'La ventana que anunció B en el último ACK que te ha llegado, aunque sea duplicado: es el sitio que B te asegura a partir del AN. Antes del primer ACK vale 256, la W de la apertura. Puedes enviar si (UltimoByteEnviado − UltimoByteReconocido) + 64 ≤ VentRecepcion.']],
+         `La ventana que anunció B en el último ACK que te ha llegado, aunque sea duplicado: es el sitio que B te asegura a partir del AN. Antes del primer ACK vale ${q.bufer}, la W de la apertura. Puedes enviar si (UltimoByteEnviado − UltimoByteReconocido) + 64 ≤ VentRecepcion.`]],
     B: [['ultimoByteRecibido', 'UltimoByteRecibido', 'último octeto recibido en orden (sin contar lo que tengas fuera de orden)',
          'El último octeto que tienes en orden, sin huecos desde el 1024. Si tienes del 1024 al 1087 y te llega del 1152 al 1215, sigue valiendo 1087: lo de después del hueco se guarda aparte. Cuando llega el segmento que rellena el hueco, salta hasta el final de lo guardado. Antes de recibir nada vale 1023. El AN de tus ACK es UltimoByteRecibido + 1.'],
         ['ultimoByteLeido', 'UltimoByteLeido', 'último octeto que ha leído tu aplicación',
          'El último octeto que tu aplicación ha sacado del búfer. Cambia solo cuando ves el aviso «Tu aplicación ha leído…». Antes de que lea nada vale 1023.<br>UltimoByteRecibido − UltimoByteLeido es lo que ocupa tu búfer: recibido y todavía sin leer.'],
         ['ventRecepcion', 'VentRecepcion', 'la W que anunciarías ahora',
-         'El sitio libre que puedes ofrecer a A: VentRecepcion = 256 − (UltimoByteRecibido − UltimoByteLeido). Lo guardado fuera de orden no se descuenta. Es la W que pondrías en un ACK enviado en este tic.']],
-  };
+         `El sitio libre que puedes ofrecer a A: VentRecepcion = ${q.bufer} − (UltimoByteRecibido − UltimoByteLeido). Lo guardado fuera de orden no se descuenta. Es la W que pondrías en un ACK enviado en este tic.`]],
+  });
+  const CAMPOS = new Proxy({}, { get: (_, rol) => camposDe(par())[rol] });   // CAMPOS.A / CAMPOS.B según la partida en curso
   const abiertos = new Set();   // desplegables «¿Qué es?» abiertos (sobreviven al redibujar)
 
   const cfg = { rol: 'A', esc: 'sorpresa', correccion: 'final', hoja: true, rapida: true, fuera: 'almacena' };
@@ -31,7 +35,7 @@
   /* ---------- Inicio ---------- */
 
   function inicio() {
-    fase = 'inicio';
+    fase = 'inicio'; partida = null;   // sin partida: los textos hablan del caso por defecto
     h(`
       <header class="barra"><div class="marca"><h1>TCPGame</h1><span>Control de flujo, desde dentro de un extremo</span></div></header>
       <section class="intro">
@@ -43,8 +47,8 @@
           <button type="button" class="papel ${x}" data-rol="${x}" aria-pressed="${cfg.rol === x}">
             <strong>${NOMBRE[x]}</strong>
             <span>${x === 'A'
-              ? 'Tu aplicación te ha dado 384 B (del 1024 al 1407). Decide en cada tic si cabe otro segmento en la ventana que te anuncia B.'
-              : 'Recibes los segmentos de A en un búfer de 256 B. Decide cuándo enviar el ACK y qué AN y qué W anuncias.'}</span>
+              ? `Tu aplicación te ha dado ${PAR_DEF.segmentos * P.MSS} B (del ${P.SN_A} al ${PAR_DEF.fin - 1}). Decide en cada tic si cabe otro segmento en la ventana que te anuncia B.`
+              : `Recibes los segmentos de A en un búfer de ${PAR_DEF.bufer} B. Decide cuándo enviar el ACK y qué AN y qué W anuncias.`}</span>
           </button>`).join('')}
       </div>
       <div class="opciones">
@@ -96,16 +100,17 @@
   }
 
   function reglasHTML() {
+    const q = par();
     return `
       <ul>
         <li><b>Tiempo en tics.</b> Un segmento sale al comienzo de un tic y llega a mitad de ese mismo tic. El otro lo tiene en cuenta en su decisión del tic siguiente. Por eso, lo que ves al empezar el tic <i>n</i> llegó a mitad del tic <i>n</i> − 1 y ya cuenta para lo que decidas en el tic <i>n</i>. Como mucho, un segmento por tic.</li>
-        <li><b>Datos de partida.</b> MSS = 64 B. A envía del 1024 al 1407 (6 segmentos). B tiene <code>BufferRecepcion</code> = 256 B y en la apertura anunció W = 256. Los ACK de B llevan SN = 2048.</li>
+        <li><b>Datos de partida.</b> MSS = 64 B. A envía del ${P.SN_A} al ${q.fin - 1} (${q.segmentos} segmentos). B tiene <code>BufferRecepcion</code> = ${q.bufer} B y en la apertura anunció W = ${q.bufer}. Los ACK de B llevan SN = 2048.</li>
         <li><b>A puede enviar</b> si <code>(UltimoByteEnviado − UltimoByteReconocido) + 64 ≤ VentRecepcion</code>, con la W del último ACK. Si no cabe, espera: en esta versión no hay segmento de sondeo.</li>
         <li><b>Variables de la hoja</b> (los nombres de Kurose). Todas son números de octeto y empiezan en 1023, el anterior al primero.
           <ul>
             ${['A', 'B'].map((x) => CAMPOS[x].map(([, n, , d]) => `<li><b>${n}</b>${x === 'A' ? ' (A)' : ' (B)'}: ${d}</li>`).join('')).join('')}
           </ul></li>
-        <li><b>B calcula</b> <code>VentRecepcion = 256 − (UltimoByteRecibido − UltimoByteLeido)</code> en el tic en que envía el ACK.</li>
+        <li><b>B calcula</b> <code>VentRecepcion = ${q.bufer} − (UltimoByteRecibido − UltimoByteLeido)</code> en el tic en que envía el ACK.</li>
         <li><b>ACK retardado (CR3).</b> Si a B le llega un segmento en orden y no tenía ningún ACK pendiente, espera un tic. En el tic siguiente envía el ACK, que también reconoce el que haya llegado entretanto (CR4).</li>
         <li><b>Fuera de orden (CR5).</b> Si a B le llega un segmento fuera de orden, responde enseguida con un ACK duplicado (el AN que sigue esperando). Lo que hace con el segmento depende de la opción de la partida, como en los ejercicios:
           <ul>
@@ -231,14 +236,14 @@
 
   function fijosHTML(rol) {
     return rol === 'A'
-      ? `<dl><dt>Fichero</dt><dd>384 B, del 1024 al 1407</dd><dt>MSS</dt><dd>64 B por segmento</dd>
-         <dt>W inicial de B</dt><dd>256 (anunciada en la apertura)</dd><dt>Tus segmentos</dt><dd>AN = 2048 · W = 512</dd>
+      ? `<dl><dt>Fichero</dt><dd>${par().segmentos * P.MSS} B, del ${P.SN_A} al ${par().fin - 1}</dd><dt>MSS</dt><dd>64 B por segmento</dd>
+         <dt>W inicial de B</dt><dd>${par().bufer} (anunciada en la apertura)</dd><dt>Tus segmentos</dt><dd>AN = 2048 · W = 512</dd>
          <dt>Temporizador</dt><dd>${escReal.rto} tics (lo lleva el juego)</dd>
          <dt>Retx. rápida</dt><dd>${escReal.rapida ? 'sí, al tercer ACK duplicado' : 'no'}</dd>
          <dt>Al vencer</dt><dd>${escReal.fuera === 'descarta' ? 'reenvías el más antiguo y luego toda la cola' : 'reenvías solo el más antiguo'}</dd>
          <dt>Ahora</dt><dd>${temporizadorTxt()}</dd></dl>`
-      : `<dl><dt>BufferRecepcion</dt><dd>256 B</dd><dt>Primer octeto de A</dt><dd>1024</dd><dt>MSS</dt><dd>64 B</dd>
-         <dt>W anunciada</dt><dd>256 en la apertura</dd><dt>Tus ACK</dt><dd>SN = 2048 · sin datos</dd>
+      : `<dl><dt>BufferRecepcion</dt><dd>${par().bufer} B</dd><dt>Primer octeto de A</dt><dd>1024</dd><dt>MSS</dt><dd>64 B</dd>
+         <dt>W anunciada</dt><dd>${par().bufer} en la apertura</dd><dt>Tus ACK</dt><dd>SN = 2048 · sin datos</dd>
          <dt>Fuera de orden</dt><dd>${escReal.fuera === 'descarta' ? 'lo descartas' : 'lo guardas'}</dd></dl>`;
   }
 
@@ -394,16 +399,16 @@
     const errCampos = jugadas.reduce((n, x) => n + x.humano.evaluacion.campos.filter((c) => !c.ok).length, 0);
     const desc = partida.registro.filter((s) => s.descartado && s.motivo === 'no_cabe').length;
     // Solo cuenta como transferido si B tiene de verdad el fichero entero en orden.
-    const completo = partida.fin.motivo === 'completo' && partida.B.rec >= P.FIN_A - 1;
+    const completo = partida.fin.motivo === 'completo' && partida.B.rec >= partida.par.fin - 1;
     const total = completo ? partida.fin.tic + 2 * desc + 2 * errDec + errCampos : null;
     return { jugadas: jugadas.length, errDec, decMal, errCampos, desc, completo, total, ref: refTic };
   }
 
   /** Cómo acabó la transferencia, mirando lo que tiene B de verdad, no lo que cree A. */
   function resultado(s) {
-    const B = partida.B, fin = partida.fin, ref = refTic;
+    const B = partida.B, fin = partida.fin, ref = refTic, finAN = partida.par.fin;
     const trozos = [];
-    for (let sn = P.SN_A; sn < P.FIN_A; sn += P.MSS) {
+    for (let sn = P.SN_A; sn < partida.par.fin; sn += P.MSS) {
       const ult = sn + P.MSS - 1;
       trozos.push({ sn, ult, estado: ult <= B.rec ? 'orden' : B.fuera.some((f) => f.ini <= sn && f.fin >= ult) ? 'fuera' : 'falta' });
     }
@@ -414,18 +419,18 @@
     const errTxt = primerError ? ` La primera decisión distinta de TCP fue en el tic ${primerError.tic}: ${primerError.humano.evaluacion.decision.texto}` : '';
     const huecoTxt = (faltan.length ? ` Le faltan ${lista(faltan)}.` : '') + (fuera.length ? ` Tiene ${lista(fuera)}, pero fuera de orden: detrás de un hueco, sin poder entregarlo a la aplicación.` : '');
 
-    if (fin.motivo === 'completo' && B.rec < P.FIN_A - 1) {
+    if (fin.motivo === 'completo' && B.rec < finAN - 1) {
       // A da el fichero por entregado, pero B no lo tiene: B confirmó algo que no tenía en orden.
       const mentira = partida.historia.find((x) => x.enviados && x.enviados.B && x.enviados.B.an > x.foto.B.ultimoByteRecibido + 1);
       const quien = mentira
         ? ` En el tic ${mentira.tic} B envió AN = ${mentira.enviados.B.an} cuando solo tenía en orden hasta el ${mentira.foto.B.ultimoByteRecibido}: A dio esos octetos por entregados y ya no los volvió a enviar.`
         : '';
       return { clase: 'err', titulo: fuera.length ? 'Fichero desordenado y con huecos' : 'Faltan fragmentos del fichero',
-        texto: `A cree que ha terminado (el ACK con AN = 1408 salió en el tic ${fin.tic}), pero B no tiene el fichero entero en orden.${huecoTxt}${quien}`, trozos };
+        texto: `A cree que ha terminado (el ACK con AN = ${finAN} salió en el tic ${fin.tic}), pero B no tiene el fichero entero en orden.${huecoTxt}${quien}`, trozos };
     }
     if (fin.motivo !== 'completo') {
-      return B.rec >= P.FIN_A - 1
-        ? { clase: 'err', titulo: 'La transferencia no terminó', texto: `B tiene el fichero entero, pero a los ${P.MAX_TICS} tics A todavía no lo sabía: no le llegó el ACK con AN = 1408.${errTxt}`, trozos }
+      return B.rec >= finAN - 1
+        ? { clase: 'err', titulo: 'La transferencia no terminó', texto: `B tiene el fichero entero, pero a los ${P.MAX_TICS} tics A todavía no lo sabía: no le llegó el ACK con AN = ${finAN}.${errTxt}`, trozos }
         : { clase: 'err', titulo: 'Faltan fragmentos: la transferencia se quedó a medias', texto: `A los ${P.MAX_TICS} tics la conexión seguía sin avanzar.${huecoTxt}${errTxt}`, trozos };
     }
     if (fin.tic > ref) {
@@ -441,15 +446,18 @@
       texto: `B tiene el fichero entero y en orden, y el ACK final salió en el tic ${fin.tic}, igual que con TCP.${nota}`, trozos };
   }
 
+  // Trozos por fila de la tira: hasta 6 en una fila; más, repartidos a partes iguales.
+  const columnasFichero = (n) => Math.ceil(n / Math.ceil(n / 6));
+
   function resultadoHTML(res) {
     const nombre = { orden: 'en orden', fuera: 'fuera de orden', falta: 'falta' };
     return `<section class="resultado ${res.clase}">
       <h2>${res.titulo}</h2>
       <p>${esc(res.texto)}</p>
-      <div class="fichero" role="list" aria-label="El fichero en B">
+      <div class="fichero" role="list" style="--cols:${columnasFichero(res.trozos.length)}" aria-label="El fichero en B">
         ${res.trozos.map((t) => `<div class="trozo ${t.estado}" role="listitem" title="${nombre[t.estado]}"><span class="num">${t.sn}</span><small>${nombre[t.estado]}</small></div>`).join('')}
       </div>
-      <p class="ayuda nota">El fichero tal como lo tiene B al final, en trozos de 64 B</p>
+      <p class="ayuda nota">El fichero tal como lo tiene B al final, en trozos de ${P.MSS} B</p>
     </section>`;
   }
 
@@ -529,12 +537,13 @@
     const T = Math.max(ultimoSeg + 1, p.historia.length ? p.historia[p.historia.length - 1].tic : 1);
     const W = 640, top = 46, fila = 34, H = top + T * fila + 12;
     const xT = 14, xA = 196, xB = 452, xC = 476, cel = 30;
+    const bufer = p.par.bufer, casillas = bufer <= 256 ? bufer / P.MSS : 0;   // búfer grande: texto «sin leer / búfer» en lugar de casillas
     const y = (t) => top + (t - 1) * fila;
     const o = [];
     o.push(`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de secuencia de la partida">`);
     o.push(`<text class="txt cab" x="${xA}" y="20" text-anchor="middle">A</text><text class="txt cab" x="${xB}" y="20" text-anchor="middle">B</text>`);
     o.push(`<text class="txt tenue" x="${xA - 14}" y="36" text-anchor="end">A sabe: en vuelo / W</text>`);
-    o.push(`<text class="txt tenue" x="${xC}" y="36">búfer de B (4 × 64 B)</text>`);
+    o.push(`<text class="txt tenue" x="${xC}" y="36">${casillas ? `búfer de B (${casillas} × ${P.MSS} B)` : 'sin leer / búfer de B'}</text>`);
     for (let t = 1; t <= T; t++) {
       o.push(`<line class="guia" x1="${xT + 30}" x2="${xA}" y1="${y(t)}" y2="${y(t)}" />`);
       o.push(`<text class="txt tenue" x="${xT}" y="${y(t) + 4}">t${t}</text>`);
@@ -545,7 +554,8 @@
         o.push(`<text class="txt" x="${xA - 14}" y="${y(t) + 4}" text-anchor="end">${a.enVuelo} / ${a.ventRecepcion}</text>`);
         // Cada casilla es un hueco de 64 B del búfer, a partir del primer octeto sin leer.
         const base = b.ultimoByteLeido + 1;
-        for (let k = 0; k < 4; k++) {
+        if (!casillas) o.push(`<text class="txt" x="${xC}" y="${y(t) + 4}">${b.sinLeer} / ${bufer}</text>`);
+        for (let k = 0; k < casillas; k++) {
           const ini = base + 64 * k;
           const clase = ini + 63 <= b.ultimoByteRecibido ? ' llena' : b.fuera.some((f) => f.ini === ini) ? ' fuera' : '';
           o.push(`<rect class="celda${clase}" x="${xC + k * (cel + 4)}" y="${y(t) - 8}" width="${cel}" height="14" rx="4" />`);
@@ -586,7 +596,7 @@
     }
     if (p.fin.motivo === 'completo') {
       const tf = p.fin.tic + 1;
-      if (tf <= T) o.push(`<text class="txt cab" x="${xA + 8}" y="${y(tf) + 4}">${p.B.rec >= P.FIN_A - 1 ? 'A sabe que ha llegado todo' : 'A cree que ha llegado todo'}</text>`);
+      if (tf <= T) o.push(`<text class="txt cab" x="${xA + 8}" y="${y(tf) + 4}">${p.B.rec >= p.par.fin - 1 ? 'A sabe que ha llegado todo' : 'A cree que ha llegado todo'}</text>`);
     }
     o.push('</svg>');
     return o.join('');

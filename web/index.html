@@ -177,7 +177,7 @@ td.num { white-space: nowrap; }
 .resultado.warn h2 { color: var(--warn); } .resultado.warn h2::after { background: var(--warn); }
 .resultado.err h2 { color: var(--err); } .resultado.err h2::after { background: var(--err); }
 .resultado > p { color: var(--ink2); max-width: 72ch; }
-.fichero { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+.fichero { display: grid; grid-template-columns: repeat(var(--cols, 6), minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
 .trozo { border-radius: var(--r-item); padding: 8px 4px; text-align: center; border: 1.5px solid var(--b); min-width: 0; }
 .trozo .num { display: block; font-size: 14px; font-weight: 500; }
 .trozo small { display: block; font-size: 12px; line-height: 16px; color: var(--ink2); }
@@ -216,7 +216,7 @@ td.num { white-space: nowrap; }
 <body>
 <main id="app" aria-live="polite"></main>
 <noscript>Este juego necesita JavaScript.</noscript>
-<script src="motor.js?v=22"></script>
-<script src="juego.js?v=22"></script>
+<script src="motor.js?v=23"></script>
+<script src="juego.js?v=23"></script>
 </body>
 </html>
