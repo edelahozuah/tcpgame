@@ -178,7 +178,7 @@
         <li><b>Actualización de ventana.</b> Si B anunció W = 0 y su aplicación libera sitio, avisa a A en ese mismo tic con un ACK (mismo AN, W nueva).</li>
         <li><b>Pérdidas.</b> En los escenarios P y AZ la red pierde algún segmento de datos o algún ACK. Nadie se entera: ni quien lo envió ni quien debía recibirlo.</li>
         <li><b>Temporizador de A.</b> Es uno solo y lo lleva el juego. Se arranca al enviar si estaba parado, se reinicia con cada ACK que reconoce algo nuevo y al retransmitir. Si vence, A reenvía el segmento más antiguo sin reconocer (SN = último AN) y, si B descarta lo que llega fuera de orden, después el resto de la cola. Reenviar la cola no reinicia el temporizador.</li>
-        <li><b>Retransmisión rápida</b> (si está activada). Un ACK es duplicado si trae el mismo AN que el último y A tiene datos sin reconocer. Al llegar el <b>tercer</b> ACK duplicado, A reenvía el segmento más antiguo sin reconocer sin esperar al temporizador. La cuenta vuelve a 0 con un ACK que reconoce algo nuevo y cuando vence el temporizador. Si está desactivada, como en los ejercicios de control de flujo, los ACK duplicados no hacen reenviar.</li>
+        <li><b>Retransmisión rápida</b> (si está activada). Un ACK es duplicado si trae el mismo AN que el último, A tiene datos sin reconocer y no agranda la W (si la agranda, es una actualización de ventana). Al llegar el <b>tercer</b> ACK duplicado, A reenvía el segmento más antiguo sin reconocer sin esperar al temporizador. La cuenta vuelve a 0 con un ACK que reconoce algo nuevo y cuando vence el temporizador. Si está desactivada, como en los ejercicios de control de flujo, los ACK duplicados no hacen reenviar.</li>
         <li><b>Si te sales de la ventana.</b> B descarta lo que no cabe en su búfer y responde enseguida con el AN que espera.</li>
         <li><b>Control de congestión (cartas C).</b> Además de la W de B, A tiene su propia ventana: la <code>VentCongestion</code> (VC), en MSS, que sube y baja según lo que le pasa a la red, y el <code>umbralAL</code>. Tres modos: <b>AL</b> (arranque lento), <b>EC</b> (evitación de la congestión) y <b>RR</b> (recuperación rápida). En estas cartas la retransmisión rápida está siempre activa y B guarda lo que llega fuera de orden: esas dos opciones no se aplican.
           <ul>
@@ -527,7 +527,14 @@
       previo = d.ok ? null : d.codigo;
     }
     const decMal = jugadas.filter((x) => !x.humano.evaluacion.decision.ok).length;
-    const errCampos = jugadas.reduce((n, x) => n + x.humano.evaluacion.campos.filter((c) => !c.ok).length, 0);
+    // Lo mismo con la hoja: un valor equivocado que se arrastra de tic en tic (mismo valor tuyo, mismo valor correcto) cuenta una vez.
+    let errCampos = 0;
+    const arrastre = {};
+    for (const x of jugadas) for (const c of x.humano.evaluacion.campos) {
+      const marca = c.ok ? null : `${c.tuyo}|${c.valor ?? c.correcto}`;
+      if (marca !== null && marca !== arrastre[c.campo]) errCampos++;
+      arrastre[c.campo] = marca;
+    }
     const desc = partida.registro.filter((s) => s.descartado && s.motivo === 'no_cabe').length;
     // Solo cuenta como transferido si B tiene de verdad el fichero entero en orden.
     const completo = partida.fin.motivo === 'completo' && partida.B.rec >= partida.par.fin - 1;
@@ -664,7 +671,7 @@
           <td class="num">${resumenAccion(rol, x.humano.accion)}</td>
           <td class="num">${resumenAccion(rol, x.humano.esperada.accion)}</td>
           <td>${ev.ok ? '<span class="si" aria-label="bien">✓</span>' : `<span class="no" aria-label="mal">✗</span>
-            <div class="ayuda">${esc(ev.decision.ok ? '' : ev.decision.texto)}${malos.map((c) => ` ${c.nombre}: era ${campoCorrecto(c)}, pusiste ${campoTuyo(c, x.humano.hoja)}.`).join('')}</div>`}</td>
+            <div class="ayuda">${esc(ev.decision.ok ? '' : ev.decision.texto)}${malos.map((c) => ` ${c.nombre}: era ${esc(campoCorrecto(c))}, pusiste ${esc(campoTuyo(c, x.humano.hoja))}.`).join('')}</div>`}</td>
         </tr>`;
       }).join('')}</tbody></table></div>`;
   }
@@ -704,15 +711,17 @@
     const escal = (clave) => pts.map((q, i) => `${i === 0 ? 'M' : 'V'}${i === 0 ? xi(q.t) : yv(q[clave])}${i === 0 ? ' ' + yv(q[clave]) : ''} H${xi(q.t + 1)}`).join(' ');
     o.push(`<path class="g-um" d="${escal('um')}" /><path class="g-vc" d="${escal('vc')}" />`);
     // marcas de pérdida: tercer ACK duplicado y vencimiento
-    let libre = 0;
+    // Dos filas de rótulos; si con muchas pérdidas seguidas no cabe otro sin pisar, se queda la marca sin rótulo (está en la tabla).
+    const ocupado = [-Infinity, -Infinity];
     for (const q of pts) if (q.ev) {
       const txt = q.ev === 'vence' ? 'vence el temporizador' : '3.er ACK duplicado', ancho = txt.length * 5.6 + 8;
       const der = xc(q.t) + 6 + ancho < W - mr, x = der ? xc(q.t) + 6 : xc(q.t) - 6;
-      const fila = Math.max(0, xc(q.t) < libre ? 1 : 0);
+      const x0 = der ? x : x - ancho, fila = ocupado.findIndex((fin) => x0 > fin);
       o.push(`<line class="g-ev" x1="${xc(q.t)}" x2="${xc(q.t)}" y1="${mt}" y2="${yv(0)}" />`);
       o.push(`<circle class="g-pto" cx="${xc(q.t)}" cy="${yv(q.vc)}" r="5" />`);
+      if (fila < 0) continue;
       o.push(`<text class="g-err" x="${x}" y="${mt - 8 - fila * 13}" text-anchor="${der ? 'start' : 'end'}">${txt}</text>`);
-      libre = der ? xc(q.t) + 6 + ancho : libre;
+      ocupado[fila] = x0 + ancho;
     }
     // etiquetas directas al final de las líneas
     const u = pts[pts.length - 1];

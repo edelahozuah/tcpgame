@@ -236,5 +236,44 @@ for (const rol of ['A', 'B']) {
   }
 }
 
+// 11. Un ACK que agranda la W no es un ACK duplicado (es una actualización de ventana), como en el simulador de ejercicios
+{
+  const p = Partida.simular({ id: 'X', grupo: 'perdidas', nombre: 'x', L: 2, rto: 4, rapida: true, fuera: 'descarta', perdidas: { datos: [{ sn: 1088, envio: 1 }], acks: [] } });
+  let casos = 0, previo = null;
+  for (const h of p.historia) for (const e of h.eventos.A) if (e.tipo === 'ack') {
+    if (previo && e.seg.an === previo.an && e.seg.w > previo.w) { casos++; ok(!e.duplicado, `tic ${h.tic}: ACK ${e.seg.an} con W ${previo.w} → ${e.seg.w} contado como duplicado`); }
+    previo = e.seg;
+  }
+  console.log(`ACK que agrandan la W con el mismo AN: ${casos}, ninguno cuenta como duplicado · fin ${p.fin.tic}`);
+  ok(casos > 0, 'el escenario debería tener algún ACK que agranda la W con el mismo AN');
+}
+
+// 12. La hoja de congestión tal como la entrega la interfaz: texto, con coma decimal o como N + c/N
+{
+  const { CC } = require('../web/motor.js');
+  for (const id of ['C2', 'C6', 'C7']) {
+    const p = new Partida(id, 'A');
+    while (p.empezarTic()) {
+      const f = p.historia[p.historia.length - 1].foto.A;
+      const ev = p.cerrarTic(p.decisionTCP('A').accion, { ...f, vc: f.vcTexto, umbral: String(f.umbral).replace('.', ','), modo: f.modo.toLowerCase() });
+      ok(ev.ok, `${id} tic ${p.tic} con la hoja en texto: ${JSON.stringify(ev.campos.filter((c) => !c.ok))}`);
+    }
+  }
+  const lee = [['4 + 2/4', 4.5], ['4,5', 4.5], ['10/3', 10 / 3], ['5', 5]];
+  for (const [txt, v] of lee) ok(Math.abs(CC.leer(txt) - v) < 1e-9, `CC.leer('${txt}') = ${CC.leer(txt)}`);
+  for (const txt of ['0x8', '1e1', '6,', 'abc', '4 + 2/']) ok(Number.isNaN(CC.leer(txt)), `CC.leer('${txt}') debería ser NaN: ${CC.leer(txt)}`);
+  // Redondeos: dos decimales valen; uno no.
+  const p = new Partida('C7', 'A');
+  const res = {};
+  while (p.empezarTic()) {
+    const f = p.historia[p.historia.length - 1].foto.A, tercio = Math.abs(f.vc - 10 / 3) < 1e-9;
+    const vc = tercio ? (res.dos === undefined ? '3,33' : '3,3') : f.vcTexto;
+    const ev = p.cerrarTic(p.decisionTCP('A').accion, { ...f, vc });
+    if (tercio) res[vc === '3,33' ? 'dos' : 'uno'] = ev.campos.find((c) => c.campo === 'vc').ok;
+  }
+  console.log(`VC = 3 + 1/3 escrita como 3,33: ${res.dos}; como 3,3: ${res.uno}`);
+  ok(res.dos === true && res.uno === false, 'tolerancia de la VC en la hoja');
+}
+
 console.log(fallos ? `\n${fallos} fallo(s)` : '\nTodo bien');
 process.exit(fallos ? 1 : 0);

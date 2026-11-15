@@ -145,7 +145,7 @@
       if (m) return Number(m[1]) + Number(m[2]) / Number(m[3]);
       m = s.match(new RegExp(`^${d}\\s*/\\s*${d}$`));
       if (m) return Number(m[1]) / Number(m[2]);
-      return s === '' ? null : Number(s);
+      return s === '' ? null : new RegExp(`^${d}$`).test(s) ? Number(s) : NaN;   // nada de «0x8» ni «1e1»
     },
   };
   /** Resumen del estado para los eventos y los textos. */
@@ -425,8 +425,8 @@
       }
       if (rol === 'A' && foto.vc !== null) {
         // VC y umbral por valor (4 + 2/4 = 4,5); el correcto de la VC, como se escribe, y su número en `valor`.
-        // El margen deja pasar el valor tal como lo muestra el juego, con cuatro decimales (3,1667).
-        const cerca = (x, y) => typeof x === 'number' && Math.abs(x - y) < 1e-4;
+        // El margen deja pasar el redondeo a dos decimales (3,33 por 3 + 1/3); dos valores distintos de la VC nunca están tan cerca.
+        const cerca = (x, y) => typeof x === 'number' && Math.abs(x - y) < 0.005;
         const vc = CC.leer(hoja.vc), um = CC.leer(hoja.umbral);
         const modo = hoja.modo === '' || hoja.modo === undefined || hoja.modo === null ? null : String(hoja.modo).trim().toUpperCase();
         campos.push({ campo: 'vc', nombre: 'VentCongestion', tuyo: vc, correcto: foto.vcTexto, valor: foto.vc, ok: cerca(vc, foto.vc) });
@@ -439,7 +439,7 @@
   }
 
   const MODOS = { AL: 'arranque lento (AL)', EC: 'evitación de la congestión (EC)', RR: 'recuperación rápida (RR)' };
-  const num = (v) => decimal(v);
+  const num = (v) => decimal(v).replace('-', '−');
   const entreParentesis = (t) => (t.includes(' + ') ? `(${t})` : t);
 
   /** Qué ha hecho la retransmisión de este tic con umbralAL, VC y modo (vacío sin congestión). */

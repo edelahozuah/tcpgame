@@ -104,7 +104,7 @@ A5 a A7 y A12 se ven en GG3.4 (VC, AL y sus tres salidas). A8 a A11 y A13 son de
   Ejemplo: VC = 8 → Umbral = 4, VC = 7, RR.
 - **A10. En RR** (GG3.5). Cada duplicado más suma 1: `VC = VC + 1`. En RR A puede enviar segmentos nuevos si A5 lo permite.
   Ejemplo: VC = 7, llega el cuarto duplicado: VC = 8. Con 5 en vuelo, 5 < 8: envía uno nuevo.
-- **A11. Salir de RR** (GG3.5). Con el primer **ACK nuevo** (que avanza): `VC = Umbral`, **tal cual** (aunque no sea entero y sin sumar los segmentos que reconoce), el Umbral no cambia, el modo pasa a EC y `contadorACKdup = 0`.
+- **A11. Salir de RR** (GG3.5). Con el primer **ACK nuevo** (que avanza): `VC = Umbral`, **tal cual** (aunque no sea entero y sin sumar los segmentos que reconoce), el Umbral no cambia, el modo pasa a EC y `contadorACKdup = 0`. Única excepción: la VC nunca baja de 1 MSS, así que con un Umbral menor que 1 queda en 1.
   Ejemplo: VC = 8, Umbral = 4, llega un ACK de 5 segmentos: VC = 4, EC.
 - **A12. Vence el temporizador** (GG3.4 en AL; GG3.5 en EC y RR). Vale lo que diga la carta, en tics. Se arranca al enviar cuando no había nada en vuelo, se reinicia con cada ACK que avanza (si queda algo sin reconocer) y al retransmitir, y vence al comienzo del tic *t* + valor. Si en un tic llegan ACK y vence, se procesan primero los ACK. Al vencer, **en cualquier modo**: `Umbral = VC/2` (con la VC que tenga en ese momento, también la de RR), `VC = 1`, retransmite el segmento más antiguo sin reconocer, modo AL y `contadorACKdup = 0`. Quien avisa de que vence es el árbitro (decisión abierta 6).
   Ejemplo: VC = 8 → Umbral = 4, VC = 1, AL.
