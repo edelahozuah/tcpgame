@@ -1,7 +1,7 @@
 /* TCPGame: interfaz del modo individual (el alumno contra el simulador). */
 (function () {
   'use strict';
-  const { P, ESCENARIOS, Partida, escenarioAzar } = window.MotorTCP;
+  const { P, ESCENARIOS, Partida, escenarioAzar, CC } = window.MotorTCP;
   const app = document.getElementById('app');
 
   const NOMBRE = { A: 'Cliente A · emisor', B: 'Servidor B · receptor' };
@@ -22,10 +22,37 @@
         ['ventRecepcion', 'VentRecepcion', 'la W que anunciarías ahora',
          `El sitio libre que puedes ofrecer a A: VentRecepcion = ${q.bufer} − (UltimoByteRecibido − UltimoByteLeido). Lo guardado fuera de orden no se descuenta. Es la W que pondrías en un ACK enviado en este tic.`]],
   });
-  const CAMPOS = new Proxy({}, { get: (_, rol) => camposDe(par())[rol] });   // CAMPOS.A / CAMPOS.B según la partida en curso
+  const dec = (v) => String(Math.round(v * 1e4) / 1e4).replace('.', ',');   // número con coma decimal
+  const ccActivo = () => !!(partida && escReal && escReal.cc);
+  const MODOS = ['AL', 'EC', 'RR'];
+  const MODO_TXT = { AL: 'arranque lento', EC: 'evitación de la congestión', RR: 'recuperación rápida' };
+
+  // Las tres variables más de la hoja de A con control de congestión. variante: 'reno', 'tahoe' o null (reglas del inicio: las dos).
+  const camposCC = (variante) => {
+    const tercero = variante === 'tahoe'
+      ? 'umbral = VC/2, VC = 1 y vuelves a AL, como si hubiera vencido el temporizador (en esta partida, TCP Tahoe); los ACK duplicados siguientes no cambian nada.'
+      : variante === 'reno'
+        ? 'umbral = VC/2 y VC = umbral + 3, en modo RR (en esta partida, TCP Reno). Cada ACK duplicado más suma 1. El ACK nuevo que llega después fija VC = umbral y pasas a EC, sin sumar nada más. Con VC = 8: umbral = 4, VC = 7 y, con el siguiente duplicado, 8.'
+        : 'en Reno, umbral = VC/2 y VC = umbral + 3, en modo RR (cada duplicado más suma 1; el ACK nuevo fija VC = umbral y pasas a EC); en Tahoe, umbral = VC/2, VC = 1 y vuelves a AL.';
+    return [
+      ['vc', 'VentCongestion (VC)', 'en MSS: 5, 4,5 o 4 + 2/4',
+       `La ventana de congestión de A, en MSS (1 MSS = un segmento de 64 B). Se escribe como un número («5»), con decimales («4,5») o como N + c/N («4 + 2/4»). Cómo cambia según el modo:<br>
+        <b>AL</b>: suma 1 por cada segmento que reconoce un ACK nuevo; un ACK que reconoce 2 segmentos suma 2 (de 3 pasa a 5). Si N llega al umbral, pasas a EC y los segmentos que quedan de ese mismo ACK ya cuentan como EC (con umbral 5 y VC = 4, un ACK de 2 segmentos deja 5 + 1/5).<br>
+        <b>EC</b>: VC = N + c/N y cada segmento reconocido suma 1 a c; cuando c llega a N, c vuelve a 0 y N sube 1. Con VC = 4: 4 + 1/4, 4 + 2/4, 4 + 3/4 y, con el cuarto segmento reconocido, 5.<br>
+        <b>Tercer ACK duplicado</b>: ${tercero}<br>
+        <b>Vence el temporizador</b> (en cualquier modo): umbral = VC/2, VC = 1 y vuelves a AL. Con VC = 7: umbral = 3,5.<br>
+        Para enviar, los segmentos en vuelo (todo lo enviado sin reconocer, también lo que se haya perdido) tienen que ser menos que ⌊VC⌋ y, además, el segmento tiene que caber en la W de B: A está limitado por mín{VC, W}. Con VC = 4,5 puedes tener 4 segmentos en vuelo.`],
+      ['umbral', 'umbralAL (Umbral)', 'en MSS; admite coma decimal',
+       'El umbral del arranque lento, en MSS. Mientras N no lo alcanza, estás en AL; al alcanzarlo pasas a EC. No cambia hasta que hay una pérdida: al tercer ACK duplicado o al vencer el temporizador, umbral = VC/2 (con VC = 7, umbral = 3,5; si estabas en RR cuenta la VC que tenías, inflada con los +3 y los duplicados). Con umbral = 5 y VC = 4 en AL, un ACK nuevo de 1 segmento deja VC = 5, que ya alcanza el umbral: EC.'],
+      ['modo', 'Modo', 'AL, EC o RR',
+       `En qué fase del control de congestión estás. <b>AL</b> (arranque lento): la VC crece 1 por cada segmento reconocido, hasta alcanzar el umbral. <b>EC</b> (evitación de la congestión): crece 1 MSS por cada VC segmentos reconocidos (N + c/N). <b>RR</b> (recuperación rápida${variante === 'tahoe' ? ', que Tahoe no usa' : ''}): empieza al tercer ACK duplicado y acaba con el siguiente ACK nuevo, que te pasa a EC. Cuando vence el temporizador, siempre vuelves a AL. Ejemplo: en EC con VC = 6, el tercer duplicado te pasa a RR; el ACK nuevo, a EC; y si vence el temporizador, a AL con VC = 1.`],
+    ];
+  };
+  // CAMPOS.A / CAMPOS.B según la partida en curso (A añade VC, umbral y modo en las cartas de congestión)
+  const CAMPOS = new Proxy({}, { get: (_, rol) => (rol === 'A' && ccActivo() ? camposDe(par()).A.concat(camposCC(escReal.cc.variante)) : camposDe(par())[rol]) });
   const abiertos = new Set();   // desplegables «¿Qué es?» abiertos (sobreviven al redibujar)
 
-  const cfg = { rol: 'A', esc: 'sorpresa', correccion: 'final', hoja: true, rapida: true, fuera: 'almacena' };
+  const cfg = { rol: 'A', esc: 'sorpresa', correccion: 'final', hoja: true, rapida: true, fuera: 'almacena', variante: 'reno' };
   let partida = null, escReal = null, refTic = null, fase = 'inicio', borrador = null, ultimaEval = null;
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -37,7 +64,7 @@
   function inicio() {
     fase = 'inicio'; partida = null;   // sin partida: los textos hablan del caso por defecto
     h(`
-      <header class="barra"><div class="marca"><h1>TCPGame</h1><span>Control de flujo, desde dentro de un extremo</span></div></header>
+      <header class="barra"><div class="marca"><h1>TCPGame</h1><span>Control de flujo y de congestión, desde dentro de un extremo</span></div></header>
       <section class="intro">
         <h2>Juegas un extremo de una conexión TCP. El otro lo juega el ordenador.</h2>
         <p>Solo ves lo que le llega a tu lado y lo que apuntas en tu hoja, igual que TCP. No sabes qué ha enviado el otro, qué va de camino ni cuándo lee la aplicación de B. Al final se muestra el diagrama completo.</p>
@@ -47,8 +74,8 @@
           <button type="button" class="papel ${x}" data-rol="${x}" aria-pressed="${cfg.rol === x}">
             <strong>${NOMBRE[x]}</strong>
             <span>${x === 'A'
-              ? `Tu aplicación te ha dado ${PAR_DEF.segmentos * P.MSS} B (del ${P.SN_A} al ${PAR_DEF.fin - 1}). Decide en cada tic si cabe otro segmento en la ventana que te anuncia B.`
-              : `Recibes los segmentos de A en un búfer de ${PAR_DEF.bufer} B. Decide cuándo enviar el ACK y qué AN y qué W anuncias.`}</span>
+              ? 'Tu aplicación te ha dado un fichero que enviar. Decide en cada tic si cabe otro segmento: en la ventana que te anuncia B y, en las cartas de congestión, también en tu ventana de congestión.'
+              : 'Recibes los segmentos de A en un búfer. Decide cuándo enviar el ACK y qué AN y qué W anuncias.'}</span>
           </button>`).join('')}
       </div>
       <div class="opciones">
@@ -62,6 +89,15 @@
               ${Object.values(ESCENARIOS).filter((e) => e.grupo === 'perdidas').map((e) => `<option value="${e.id}">${e.id} · ${e.nombre}</option>`).join('')}
               <option value="AZ">AZ · Pérdidas al azar</option>
             </optgroup>
+            <optgroup label="Control de congestión">
+              ${Object.values(ESCENARIOS).filter((e) => e.grupo === 'congestion').map((e) => `<option value="${e.id}">${e.id} · ${e.nombre}</option>`).join('')}
+            </optgroup>
+          </select>
+        </label>
+        <label>Variante de TCP
+          <select id="o-var">
+            <option value="reno">Reno (la de los ejemplos)</option>
+            <option value="tahoe">Tahoe</option>
           </select>
         </label>
         <label>Lo que llega fuera de orden
@@ -78,6 +114,7 @@
         </label>
         <label class="check"><input type="checkbox" id="o-hoja" ${cfg.hoja ? 'checked' : ''}> Rellenar la hoja de estado en cada tic</label>
         <label class="check"><input type="checkbox" id="o-rapida" ${cfg.rapida ? 'checked' : ''}> Retransmisión rápida (3 ACK duplicados)</label>
+        <p class="nota-opc" id="nota-opc"></p>
       </div>
       <div class="acciones"><button class="btn primario" id="empezar">Empezar la partida</button></div>
       <details class="reglas panel"><summary>Reglas</summary>${reglasHTML()}</details>
@@ -85,8 +122,25 @@
     document.getElementById('o-esc').value = cfg.esc;
     document.getElementById('o-corr').value = cfg.correccion;
     document.getElementById('o-fuera').value = cfg.fuera;
+    document.getElementById('o-var').value = cfg.variante;
+    document.getElementById('o-esc').addEventListener('change', disponibilidad);
+    disponibilidad();
     app.querySelectorAll('.papel').forEach((b) => b.addEventListener('click', () => { cfg.rol = b.dataset.rol; leerOpciones(); inicio(); }));
     document.getElementById('empezar').addEventListener('click', () => { leerOpciones(); empezar(); });
+  }
+
+  const esCongestion = (id) => !!(ESCENARIOS[id] && ESCENARIOS[id].cc);
+
+  /** Qué opciones se aplican a la carta elegida (fuera de orden y retransmisión rápida no, en las C; la variante, solo en las C). */
+  function disponibilidad() {
+    const id = document.getElementById('o-esc').value, c = esCongestion(id), sorpresa = id === 'sorpresa';
+    document.getElementById('o-fuera').disabled = c;
+    document.getElementById('o-rapida').disabled = c;
+    document.getElementById('o-var').disabled = !c && !sorpresa;
+    document.getElementById('nota-opc').textContent = c
+      ? 'En las cartas de congestión, B siempre guarda lo que llega fuera de orden y la retransmisión rápida está siempre activa: esas dos opciones no se aplican.'
+      : sorpresa ? 'Si sale una carta de congestión, se usa la variante elegida y no se aplican las opciones de fuera de orden ni de retransmisión rápida.'
+      : 'La variante de TCP solo se aplica a las cartas de congestión.';
   }
 
   function leerOpciones() {
@@ -94,6 +148,8 @@
     if (q) cfg.rapida = q.checked;
     const fo = document.getElementById('o-fuera');
     if (fo) cfg.fuera = fo.value;
+    const va = document.getElementById('o-var');
+    if (va) cfg.variante = va.value;
     if (e) cfg.esc = e.value;
     if (c) cfg.correccion = c.value;
     if (k) cfg.hoja = k.checked;
@@ -124,6 +180,15 @@
         <li><b>Temporizador de A.</b> Es uno solo y lo lleva el juego. Se arranca al enviar si estaba parado, se reinicia con cada ACK que reconoce algo nuevo y al retransmitir. Si vence, A reenvía el segmento más antiguo sin reconocer (SN = último AN) y, si B descarta lo que llega fuera de orden, después el resto de la cola. Reenviar la cola no reinicia el temporizador.</li>
         <li><b>Retransmisión rápida</b> (si está activada). Un ACK es duplicado si trae el mismo AN que el último y A tiene datos sin reconocer. Al llegar el <b>tercer</b> ACK duplicado, A reenvía el segmento más antiguo sin reconocer sin esperar al temporizador. La cuenta vuelve a 0 con un ACK que reconoce algo nuevo y cuando vence el temporizador. Si está desactivada, como en los ejercicios de control de flujo, los ACK duplicados no hacen reenviar.</li>
         <li><b>Si te sales de la ventana.</b> B descarta lo que no cabe en su búfer y responde enseguida con el AN que espera.</li>
+        <li><b>Control de congestión (cartas C).</b> Además de la W de B, A tiene su propia ventana: la <code>VentCongestion</code> (VC), en MSS, que sube y baja según lo que le pasa a la red, y el <code>umbralAL</code>. Tres modos: <b>AL</b> (arranque lento), <b>EC</b> (evitación de la congestión) y <b>RR</b> (recuperación rápida). En estas cartas la retransmisión rápida está siempre activa y B guarda lo que llega fuera de orden: esas dos opciones no se aplican.
+          <ul>
+            <li><b>Cuándo envía A.</b> Los segmentos en vuelo (todo lo enviado sin reconocer, también lo perdido: A no sabe qué se ha perdido) tienen que ser menos que ⌊VC⌋ y, además, el segmento tiene que caber en la W de B. Es decir, A está limitado por mín{VC, W}. Con VC = 4,5 puede haber 4 segmentos en vuelo. Una retransmisión no pasa por esta cuenta.</li>
+            <li><b>AL.</b> Cada segmento que reconoce un ACK nuevo suma 1 a la VC: un ACK que reconoce 2 segmentos suma 2. Cuando N, la parte entera, alcanza el umbral, se pasa a EC; los segmentos que quedan de ese mismo ACK ya cuentan como EC. Con umbral = 5 y VC = 4, un ACK de 2 segmentos deja VC = 5 + 1/5.</li>
+            <li><b>EC.</b> VC = N + c/N. Cada segmento reconocido suma 1 a c y, cuando c llega a N, c vuelve a 0 y N sube 1: la VC crece 1 MSS por cada VC segmentos reconocidos. Con VC = 4: 4 + 1/4, 4 + 2/4, 4 + 3/4 y, con el cuarto, 5.</li>
+            <li><b>Tercer ACK duplicado.</b> En Reno: umbral = VC/2, VC = umbral + 3 y modo RR (con VC = 8: umbral = 4, VC = 7). Cada ACK duplicado más suma 1. El primer ACK nuevo fija VC = umbral y pasa a EC, sin sumar los segmentos que reconoce. En Tahoe: umbral = VC/2, VC = 1 y AL; los duplicados siguientes no cambian nada. En las dos, A retransmite el más antiguo sin esperar al temporizador.</li>
+            <li><b>Vence el temporizador</b> (en cualquier modo): umbral = VC/2 (si estabas en RR, la VC inflada que tenías), VC = 1 y AL. Si en un mismo tic llegan ACK y vence el temporizador, primero cuentan los ACK.</li>
+            <li><b>En tu hoja</b> apuntas la VC, el umbral y el modo que tienes <i>después</i> de lo que te ha llegado en el tic. La VC se puede escribir como «5», «4,5» o «4 + 2/4». El juego no te dice el nuevo valor: es lo que tienes que calcular.</li>
+          </ul></li>
         <li><b>Puntuación</b> (menos es mejor): tic en que sale el ACK final + 2 por cada decisión equivocada + 2 por cada segmento que B descarta por no caber + 1 por cada error en la hoja. Si repites el mismo error en tics seguidos, cuenta una vez. La referencia es lo que tarda TCP jugando bien con las mismas pérdidas.</li>
       </ul>`;
   }
@@ -133,7 +198,10 @@
   function empezar() {
     const ids = [...Object.keys(ESCENARIOS), 'AZ'];
     const id = cfg.esc === 'sorpresa' ? ids[Math.floor(Math.random() * ids.length)] : cfg.esc;
-    escReal = { ...(id === 'AZ' ? escenarioAzar() : ESCENARIOS[id]), rapida: cfg.rapida, fuera: cfg.fuera };
+    const base = id === 'AZ' ? escenarioAzar() : ESCENARIOS[id];
+    escReal = { ...base, rapida: cfg.rapida, fuera: cfg.fuera };
+    // Con congestión, la retransmisión rápida va siempre y B guarda lo fuera de orden (el motor ignora esas dos opciones).
+    if (base.cc) escReal = { ...escReal, rapida: true, fuera: 'almacena', cc: { ...base.cc, variante: cfg.variante } };
     refTic = Partida.simular(escReal).fin.tic;
     partida = new Partida(escReal, cfg.rol);
     siguienteTic();
@@ -143,6 +211,8 @@
     ultimaEval = null;
     if (!partida.empezarTic()) return final();
     borrador = { envia: false, hoja: {}, sn: '', an: '', w: '' };
+    // El modo del tic anterior queda preseleccionado, marcado como «previo» hasta que el alumno pulse uno.
+    if (ccActivo() && cfg.rol === 'A' && cfg.hoja && cuadernoPrevio().modo) { borrador.hoja.modo = cuadernoPrevio().modo; borrador.modoPrevio = true; }
     fase = 'jugando';
     juego();
   }
@@ -188,15 +258,9 @@
           <section class="panel">
             <h3>Tu hoja de estado (después de lo que te ha llegado)</h3>
             <div class="hoja">
-              ${CAMPOS[rol].map(([k, nombre, ayuda, def]) => `
-                <div class="campo">
-                  <label for="h-${k}">${nombre}<br><span class="ayuda">${ayuda}</span></label>
-                  <input id="h-${k}" data-k="${k}" inputmode="numeric" autocomplete="off" ${verEval ? 'disabled' : ''}
-                    value="${esc(borrador.hoja[k] ?? '')}" placeholder="${previo[k] ?? ''}">
-                  <details class="def" data-def="${k}" ${abiertos.has(k) ? 'open' : ''}><summary>¿Qué es?</summary><p>${def}</p></details>
-                </div>`).join('')}
+              ${CAMPOS[rol].map(([k, nombre, ayuda, def]) => campoHTML(k, nombre, ayuda, def, previo, verEval)).join('')}
             </div>
-            <p class="ayuda nota">El valor gris es lo que apuntaste en el tic anterior</p>
+            <p class="ayuda nota">El valor gris es lo que apuntaste en el tic anterior${ccActivo() && rol === 'A' ? '; en Modo, el borde discontinuo marca el del tic anterior (púlsalo para confirmarlo o elige otro)' : ''}</p>
           </section>` : ''}
           <section class="panel">
             <h3>Tu tarjeta para este tic</h3>
@@ -229,12 +293,45 @@
     enlazarJuego();
   }
 
+  function campoHTML(k, nombre, ayuda, def, previo, verEval) {
+    const detalle = `<details class="def" data-def="${k}" ${abiertos.has(k) ? 'open' : ''}><summary>¿Qué es?</summary><p>${def}</p></details>`;
+    if (k === 'modo') {
+      const sel = borrador.hoja.modo;
+      return `<div class="campo modo">
+        <span id="lbl-modo" class="lbl">${nombre}<br><span class="ayuda">${ayuda}</span></span>
+        <div class="seg" id="h-modo" role="group" aria-labelledby="lbl-modo">
+          ${MODOS.map((m) => `<button type="button" data-modo="${m}" title="${MODO_TXT[m]}" aria-pressed="${sel === m}" class="${sel === m && borrador.modoPrevio ? 'previo' : ''}" ${verEval ? 'disabled' : ''}>${m}</button>`).join('')}
+        </div>
+        ${detalle}
+      </div>`;
+    }
+    const texto = k === 'vc' || k === 'umbral';
+    return `<div class="campo">
+      <label for="h-${k}">${nombre}<br><span class="ayuda">${ayuda}</span></label>
+      <input id="h-${k}" data-k="${k}" inputmode="${texto ? (k === 'umbral' ? 'decimal' : 'text') : 'numeric'}" autocomplete="off" ${verEval ? 'disabled' : ''}
+        value="${esc(borrador.hoja[k] ?? '')}" placeholder="${esc(previo[k] ?? '')}">
+      ${detalle}
+    </div>`;
+  }
+
   function temporizadorTxt() {
     const f = partida.historia[partida.historia.length - 1].foto.A;
     return f.vence === null ? 'parado' : `en marcha, vence al empezar el tic ${f.vence}`;
   }
 
   function fijosHTML(rol) {
+    const cc = ccActivo() ? escReal.cc : null;
+    if (cc && rol === 'A') {
+      return `<dl><dt>Fichero</dt><dd>${par().segmentos * P.MSS} B, del ${P.SN_A} al ${par().fin - 1}</dd><dt>MSS</dt><dd>64 B por segmento</dd>
+         <dt>W inicial de B</dt><dd>${par().bufer} (anunciada en la apertura)</dd><dt>Tus segmentos</dt><dd>AN = 2048 · W = 512</dd>
+         <dt>VC de partida</dt><dd>${dec(cc.vc)} MSS</dd><dt>Umbral de partida</dt><dd>${dec(cc.umbral)} MSS</dd><dt>Modo de partida</dt><dd>${cc.modo}</dd>
+         <dt>Variante</dt><dd>${cc.variante === 'tahoe' ? 'Tahoe' : 'Reno'}</dd>
+         <dt>Envías si</dt><dd>en vuelo &lt; ⌊VC⌋ y cabe en la W</dd>
+         <dt>Temporizador</dt><dd>${escReal.rto} tics (lo lleva el juego)</dd>
+         <dt>Retx. rápida</dt><dd>activa: al tercer ACK duplicado</dd>
+         <dt>Al vencer</dt><dd>reenvías solo el más antiguo</dd>
+         <dt>Ahora</dt><dd>${temporizadorTxt()}</dd></dl>`;
+    }
     return rol === 'A'
       ? `<dl><dt>Fichero</dt><dd>${par().segmentos * P.MSS} B, del ${P.SN_A} al ${par().fin - 1}</dd><dt>MSS</dt><dd>64 B por segmento</dd>
          <dt>W inicial de B</dt><dd>${par().bufer} (anunciada en la apertura)</dd><dt>Tus segmentos</dt><dd>AN = 2048 · W = 512</dd>
@@ -269,6 +366,11 @@
   function enlazarJuego() {
     app.querySelectorAll('details.def').forEach((d) => d.addEventListener('toggle', () => { if (d.open) abiertos.add(d.dataset.def); else abiertos.delete(d.dataset.def); }));
     app.querySelectorAll('.hoja input').forEach((i) => i.addEventListener('input', () => { borrador.hoja[i.dataset.k] = i.value.trim(); }));
+    app.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => {
+      borrador.hoja.modo = b.dataset.modo; borrador.modoPrevio = false;
+      app.querySelectorAll('[data-modo]').forEach((x) => { x.setAttribute('aria-pressed', String(x === b)); x.classList.remove('previo'); });
+      document.getElementById('h-modo').classList.remove('mal');
+    }));
     app.querySelectorAll('[data-envia]').forEach((b) => b.addEventListener('click', () => {
       guardarTarjeta(); borrador.envia = b.dataset.envia === '1'; juego();
       const foco = document.getElementById(cfg.rol === 'A' ? 't-sn' : 't-an');
@@ -306,7 +408,9 @@
     guardarTarjeta();
     const aviso = document.getElementById('aviso');
     const malos = [];
-    if (cfg.hoja) for (const [k] of CAMPOS[cfg.rol]) if (!entero(borrador.hoja[k] ?? '')) malos.push('h-' + k);
+    const ccNum = (v) => { const n = CC.leer(v ?? ''); return typeof n === 'number' && isFinite(n) && n >= 0; };
+    const validos = { vc: ccNum, umbral: ccNum, modo: (v) => MODOS.includes(v) };
+    if (cfg.hoja) for (const [k] of CAMPOS[cfg.rol]) if (!(validos[k] || ((v) => entero(v ?? '')))(borrador.hoja[k])) malos.push('h-' + k);
     let accion = null;
     if (borrador.envia) {
       if (cfg.rol === 'A') {
@@ -318,14 +422,17 @@
         if (!malos.includes('t-an') && !malos.includes('t-w')) accion = { sn: P.SN_B, an: +borrador.an, w: +borrador.w, datos: 0 };
       }
     }
-    app.querySelectorAll('input.mal').forEach((i) => i.classList.remove('mal'));
+    app.querySelectorAll('input.mal, .seg.mal').forEach((i) => i.classList.remove('mal'));
     if (malos.length) {
       malos.forEach((id) => document.getElementById(id)?.classList.add('mal'));
-      aviso.textContent = 'Rellena con números enteros los campos marcados.';
-      document.getElementById(malos[0])?.focus();
+      const cc = malos.some((id) => ['h-vc', 'h-umbral', 'h-modo'].includes(id));
+      aviso.textContent = cc ? 'Revisa los campos marcados: números enteros en los octetos; la VC y el umbral, un número (5, 4,5 o 4 + 2/4); y elige un modo.' : 'Rellena con números enteros los campos marcados.';
+      const f = document.getElementById(malos[0]);
+      if (f) (f.tagName === 'INPUT' ? f : f.querySelector('button'))?.focus();
       return;
     }
-    const hoja = cfg.hoja ? Object.fromEntries(CAMPOS[cfg.rol].map(([k]) => [k, +borrador.hoja[k]])) : null;
+    // VC, umbral y modo se entregan tal como los teclea el alumno; el motor los interpreta.
+    const hoja = cfg.hoja ? Object.fromEntries(CAMPOS[cfg.rol].map(([k]) => [k, validos[k] ? borrador.hoja[k] : +borrador.hoja[k]])) : null;
     ultimaEval = partida.cerrarTic(accion, hoja);
     if (cfg.correccion === 'tic') { fase = 'veredicto'; juego(); }
     else siguienteTic();
@@ -334,11 +441,35 @@
   function veredictoHTML(ev) {
     if (!ev) return '';
     const malCampos = ev.campos.filter((c) => !c.ok);
+    const hoja = partida.historia[partida.historia.length - 1].humano.hoja;
+    const cambios = cfg.rol === 'A' ? cambiosCC(partida.eventos.A) : [];
     return `<div class="veredicto ${ev.ok ? 'ok' : 'mal'}">
       <strong>${ev.decision.ok ? 'Decisión correcta' : 'Decisión incorrecta'}</strong>
       ${esc(ev.decision.texto)}
-      ${malCampos.length ? `<ul>${malCampos.map((c) => `<li><code>${c.nombre}</code>: era <b class="num">${c.correcto}</b> (pusiste ${c.tuyo})</li>`).join('')}</ul>` : ''}
+      ${malCampos.length ? `<ul>${malCampos.map((c) => `<li><code>${c.nombre}</code>: era <b class="num">${esc(campoCorrecto(c))}</b> (pusiste ${esc(campoTuyo(c, hoja))})</li>`).join('')}</ul>` : ''}
+      ${cambios.length ? `<ul class="cambios">${cambios.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
     </div>`;
+  }
+
+  // Lo que se enseña de un campo de la hoja que falló: el valor correcto y lo que escribió el alumno, tal cual.
+  const campoCorrecto = (c) => (c.campo === 'umbral' ? dec(c.correcto) : c.correcto);
+  const campoTuyo = (c, hoja) => (hoja && ['vc', 'umbral', 'modo'].includes(c.campo) ? hoja[c.campo] : c.tuyo);
+
+  /** Qué ha cambiado en VC, umbral y modo (solo lo que cambia), «antes → después». */
+  function cambioTxt(cc) {
+    const a = cc.antes, d = cc.despues, t = [`VC ${a.vcTexto} → ${d.vcTexto}`];
+    if (a.umbral !== d.umbral) t.push(`umbral ${dec(a.umbral)} → ${dec(d.umbral)}`);
+    if (a.modo !== d.modo) t.push(`modo ${a.modo} → ${d.modo}`);
+    return t.join(', ');
+  }
+  /** Una línea por evento de A con cambio de congestión (para el veredicto y la tabla final). */
+  function cambiosCC(evs) {
+    return evs.filter((e) => e.cc).map((e) => {
+      const k = e.cc.k;
+      const causa = e.tipo === 'vence' ? 'Vence el temporizador' : e.tipo === 'rapida' ? 'Tercer ACK duplicado'
+        : e.duplicado ? `ACK duplicado n.º ${e.n}` : `ACK nuevo (reconoce ${k} segmento${k === 1 ? '' : 's'})`;
+      return `${causa}: ${cambioTxt(e.cc)}`;
+    });
   }
 
   function cuadernoPrevio() {
@@ -371,14 +502,14 @@
   function cuadernoHTML(rol) {
     const filas = partida.historia.filter((x) => x.humano);
     if (!filas.length) return '<p class="vacio">Aquí irá lo que apuntes en cada tic.</p>';
-    const corto = { ultimoByteEnviado: 'Enviado', ultimoByteReconocido: 'Reconocido', ultimoByteRecibido: 'Recibido', ultimoByteLeido: 'Leído', ventRecepcion: 'W' };
+    const corto = { ultimoByteEnviado: 'Enviado', ultimoByteReconocido: 'Reconocido', ultimoByteRecibido: 'Recibido', ultimoByteLeido: 'Leído', ventRecepcion: 'W', vc: 'VC', umbral: 'Umbral', modo: 'Modo' };
     const cab = cfg.hoja ? CAMPOS[rol].map(([k, n]) => `<th title="${n}">${corto[k]}</th>`).join('') : '';
-    return `<div class="tabla-scroll"><table>
+    return `<div class="tabla-scroll"><table${ccActivo() && rol === 'A' && cfg.hoja ? ' class="ancha"' : ''}>
       <thead><tr><th>Tic</th><th title="Llegó a mitad del tic anterior">Tenías nuevo</th>${cab}<th>Enviaste</th>${cfg.correccion === 'tic' ? '<th></th>' : ''}</tr></thead>
       <tbody>${filas.map((x) => `<tr>
         <td class="num">${x.tic}</td>
         <td>${esc(resumenEventos(rol, x.eventos[rol]))}</td>
-        ${cfg.hoja ? CAMPOS[rol].map(([k]) => `<td class="num">${x.humano.hoja[k]}</td>`).join('') : ''}
+        ${cfg.hoja ? CAMPOS[rol].map(([k]) => `<td class="num">${esc(x.humano.hoja[k])}</td>`).join('') : ''}
         <td class="num">${resumenAccion(rol, x.humano.accion)}</td>
         ${cfg.correccion === 'tic' ? `<td>${x.humano.evaluacion.ok ? '<span class="si" aria-label="bien">✓</span>' : '<span class="no" aria-label="mal">✗</span>'}</td>` : ''}
       </tr>`).join('')}</tbody></table></div>`;
@@ -469,6 +600,7 @@
         <div class="marca"><h1>TCPGame</h1><span>Fin de la partida</span></div>
         <span class="chip ${rol}">${NOMBRE[rol]}</span>
         <span class="chip">Escenario ${e.id} · ${e.nombre}</span>
+        ${e.cc ? `<span class="chip">TCP ${e.cc.variante === 'tahoe' ? 'Tahoe' : 'Reno'}</span>` : ''}
       </header>
       ${resultadoHTML(res)}
       <p class="ayuda">Lo que no sabías: ${descripcionEscenario(e)}</p>
@@ -481,17 +613,18 @@
       <div class="col">
         <section class="panel diagrama">
           <h3>Lo que pasó en realidad</h3>
-          ${diagramaSVG()}
+          ${escReal.cc ? `<div class="tabla-scroll">${diagramaSVG()}</div>` : diagramaSVG()}
           <div class="leyenda">
             <span><i style="background:var(--a)"></i>Datos de A</span>
             <span><i style="background:var(--b)"></i>ACK de B</span>
             <span><i style="background:var(--b);height:8px;width:8px;opacity:.85"></i>64 B en orden sin leer</span>
             <span><i style="background:var(--b-soft);border:1px dashed var(--b);height:8px;width:8px"></i>64 B guardados fuera de orden</span>
             <span><i style="border-top:2px dashed var(--muted);height:0"></i>✗ se pierde en la red</span>
-            <span>A la izquierda, lo que sabía A: en vuelo / W</span>
+            <span>${e.cc ? 'A la izquierda, lo que sabía A: VC y modo, y en vuelo / W (fondo marcado: tics en que cambian la VC, el umbral o el modo)' : 'A la izquierda, lo que sabía A: en vuelo / W'}</span>
             <span><b class="no">✗</b> junto al tic: te equivocaste · en B: segmento descartado (etiqueta en rojo)</span>
           </div>
         </section>
+        ${e.cc ? graficaVC() : ''}
         <section class="panel">
           <h3>Tic a tic: tú frente a TCP</h3>
           ${tablaFinalHTML(rol)}
@@ -512,6 +645,10 @@
     const ord = (n) => `${n}.º`;
     const lect = e.L === 0 ? 'la aplicación de B leía cada segmento en cuanto llegaba' : `la aplicación de B tardaba ${e.L} tics en leer cada segmento`;
     const p = [...e.perdidas.datos.map((d) => `el segmento SN = ${d.sn} (${ord(d.envio)} envío)`), ...e.perdidas.acks.map((k) => `el ${ord(k)} ACK de B`)];
+    if (e.cc) {
+      const c = e.cc, bu = partida.par.bufer;
+      return `${lect}; ${p.length ? `la red perdía ${p.join(' y ')}` : 'la red no perdía nada'}; temporizador de A: ${e.rto} tics; búfer de B: ${bu} B; A empezaba con VC = ${dec(c.vc)} MSS, umbralAL = ${dec(c.umbral)} MSS y en ${c.modo} (${MODO_TXT[c.modo]}); variante de TCP: ${c.variante === 'tahoe' ? 'Tahoe' : 'Reno'}.`;
+    }
     return `${lect}; ${p.length ? `la red perdía ${p.join(' y ')}` : 'la red no perdía nada'}; temporizador de A: ${e.rto} tics${e.rapida ? '; con retransmisión rápida' : '; sin retransmisión rápida'}; B ${e.fuera === 'descarta' ? 'descartaba' : 'guardaba'} lo que llegaba fuera de orden.`;
   }
 
@@ -523,26 +660,102 @@
         const ev = x.humano.evaluacion, malos = ev.campos.filter((c) => !c.ok);
         return `<tr>
           <td class="num">${x.tic}</td>
-          <td>${esc(resumenEventos(rol, x.eventos[rol]))}</td>
+          <td>${esc(resumenEventos(rol, x.eventos[rol]))}${rol === 'A' ? cambiosCC(x.eventos.A).map((t) => `<span class="cambio-cc">${esc(t)}</span>`).join('') : ''}</td>
           <td class="num">${resumenAccion(rol, x.humano.accion)}</td>
           <td class="num">${resumenAccion(rol, x.humano.esperada.accion)}</td>
           <td>${ev.ok ? '<span class="si" aria-label="bien">✓</span>' : `<span class="no" aria-label="mal">✗</span>
-            <div class="ayuda">${esc(ev.decision.ok ? '' : ev.decision.texto)}${malos.map((c) => ` ${c.nombre}: era ${c.correcto}, pusiste ${c.tuyo}.`).join('')}</div>`}</td>
+            <div class="ayuda">${esc(ev.decision.ok ? '' : ev.decision.texto)}${malos.map((c) => ` ${c.nombre}: era ${campoCorrecto(c)}, pusiste ${campoTuyo(c, x.humano.hoja)}.`).join('')}</div>`}</td>
         </tr>`;
       }).join('')}</tbody></table></div>`;
+  }
+
+  /** Gráfica de la VC, el umbral y los segmentos en vuelo, tic a tic (con congestión). */
+  function graficaVC() {
+    const hs = partida.historia, T = hs[hs.length - 1].tic;
+    const pts = hs.map((x) => {
+      const a = x.foto.A, ev = x.eventos.A.find((e) => e.tipo === 'vence') || x.eventos.A.find((e) => e.tipo === 'rapida');
+      return { t: x.tic, vc: a.vc, vt: a.vcTexto, um: a.umbral, modo: a.modo, vuelo: a.vueloSeg, ev: ev ? ev.tipo : null };
+    });
+    const W = 760, H = 320, ml = 46, mr = 64, mt = 38, mb = 44, pw = W - ml - mr, ph = H - mt - mb;
+    const mx = Math.max(...pts.map((q) => Math.max(q.vc, q.um, q.vuelo)));
+    const paso = mx <= 8 ? 1 : mx <= 16 ? 2 : mx <= 40 ? 5 : 10, ymax = Math.ceil((mx * 1.05) / paso) * paso;
+    const bw = pw / T, xi = (t) => ml + (t - 1) * bw, xc = (t) => xi(t) + bw / 2, yv = (v) => mt + ph * (1 - v / ymax);
+    const o = [`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de la ventana de congestión, el umbral y los segmentos en vuelo en cada tic" style="min-width:520px">`];
+    // franjas por modo (tics seguidos con el mismo modo)
+    for (let i = 0; i < pts.length;) {
+      let j = i; while (j + 1 < pts.length && pts[j + 1].modo === pts[i].modo) j++;
+      o.push(`<rect class="g-${pts[i].modo}" x="${xi(pts[i].t)}" y="${mt}" width="${(j - i + 1) * bw}" height="${ph}" />`);
+      o.push(`<text class="g-modo" x="${xi(pts[i].t) + (j - i + 1) * bw / 2}" y="${mt + 14}" text-anchor="middle">${pts[i].modo}</text>`);
+      i = j + 1;
+    }
+    for (let v = 0; v <= ymax; v += paso) {
+      o.push(`<line class="${v === 0 ? 'g-eje' : 'g-grid'}" x1="${ml}" x2="${W - mr}" y1="${yv(v)}" y2="${yv(v)}" />`);
+      o.push(`<text class="g-t" x="${ml - 8}" y="${yv(v) + 4}" text-anchor="end">${v}</text>`);
+    }
+    o.push(`<text class="g-t" x="${ml - 8}" y="${mt - 8}" text-anchor="end">MSS</text>`);
+    const cada = Math.ceil(T / Math.floor(pw / 26));
+    for (const q of pts) if ((q.t - 1) % cada === 0) o.push(`<text class="g-t" x="${xc(q.t)}" y="${H - mb + 16}" text-anchor="middle">${q.t}</text>`);
+    o.push(`<text class="g-t" x="${W - mr}" y="${H - 6}" text-anchor="end">tic</text>`);
+    // segmentos en vuelo: columnas finas, serie secundaria
+    for (const q of pts) if (q.vuelo > 0) {
+      const w = Math.min(14, bw * 0.45), y0 = yv(q.vuelo);
+      o.push(`<rect class="g-vuelo" x="${xc(q.t) - w / 2}" y="${y0}" width="${w}" height="${yv(0) - y0}" rx="3" />`);
+    }
+    const escal = (clave) => pts.map((q, i) => `${i === 0 ? 'M' : 'V'}${i === 0 ? xi(q.t) : yv(q[clave])}${i === 0 ? ' ' + yv(q[clave]) : ''} H${xi(q.t + 1)}`).join(' ');
+    o.push(`<path class="g-um" d="${escal('um')}" /><path class="g-vc" d="${escal('vc')}" />`);
+    // marcas de pérdida: tercer ACK duplicado y vencimiento
+    let libre = 0;
+    for (const q of pts) if (q.ev) {
+      const txt = q.ev === 'vence' ? 'vence el temporizador' : '3.er ACK duplicado', ancho = txt.length * 5.6 + 8;
+      const der = xc(q.t) + 6 + ancho < W - mr, x = der ? xc(q.t) + 6 : xc(q.t) - 6;
+      const fila = Math.max(0, xc(q.t) < libre ? 1 : 0);
+      o.push(`<line class="g-ev" x1="${xc(q.t)}" x2="${xc(q.t)}" y1="${mt}" y2="${yv(0)}" />`);
+      o.push(`<circle class="g-pto" cx="${xc(q.t)}" cy="${yv(q.vc)}" r="5" />`);
+      o.push(`<text class="g-err" x="${x}" y="${mt - 8 - fila * 13}" text-anchor="${der ? 'start' : 'end'}">${txt}</text>`);
+      libre = der ? xc(q.t) + 6 + ancho : libre;
+    }
+    // etiquetas directas al final de las líneas
+    const u = pts[pts.length - 1];
+    let yV = yv(u.vc) - 8, yU = yv(u.um) + 4;
+    if (Math.abs(yV - yU) < 14) { if (u.vc >= u.um) { yV = yv(u.vc) - 10; yU = yv(u.um) + 14; } else { yV = yv(u.vc) + 14; yU = yv(u.um) - 6; } }
+    o.push(`<text class="g-dir" x="${W - mr + 8}" y="${yV}">VC</text><text class="g-dir" x="${W - mr + 8}" y="${yU}">umbral</text>`);
+    for (const q of pts) o.push(`<rect class="g-hit" x="${xi(q.t)}" y="${mt}" width="${bw}" height="${ph}"><title>Tic ${q.t}: VC ${q.vt}, umbral ${dec(q.um)}, modo ${q.modo}, ${dec(q.vuelo)} en vuelo</title></rect>`);
+    o.push('</svg>');
+    const esA = cfg.rol === 'A';
+    return `<section class="panel diagrama grafica">
+      <h3>${esA ? 'Tu ventana de congestión' : 'La ventana de congestión de A'}</h3>
+      <p class="ayuda">VC y umbral valen lo que A sabía al decidir en cada tic, ya con lo que le llegó. A solo envía datos nuevos mientras los segmentos en vuelo (columnas) sean menos que ⌊VC⌋.</p>
+      <div class="tabla-scroll">${o.join('')}</div>
+      <div class="leyenda">
+        <span><i style="background:var(--a)"></i>VentCongestion (VC)</span>
+        <span><i style="border-top:2px dashed var(--ink2);height:0"></i>umbralAL</span>
+        <span><i style="background:var(--muted);opacity:.4;height:8px;width:8px"></i>Segmentos en vuelo</span>
+        <span><i class="sw" style="background:var(--soft);height:10px;width:10px"></i>AL, arranque lento</span>
+        <span><i class="sw" style="background:var(--a-soft);height:10px;width:10px"></i>EC, evitación de la congestión</span>
+        <span><i class="sw" style="background:var(--warn-soft);height:10px;width:10px"></i>RR, recuperación rápida</span>
+      </div>
+      <details class="def"><summary>Ver los valores como tabla</summary>
+        <div class="tabla-scroll tabla-vc"><table><thead><tr><th>Tic</th><th>VC</th><th>Umbral</th><th>Modo</th><th>En vuelo (MSS)</th></tr></thead>
+        <tbody>${pts.map((q) => `<tr><td class="num">${q.t}</td><td class="num">${q.vt}</td><td class="num">${dec(q.um)}</td><td class="num">${q.modo}</td><td class="num">${dec(q.vuelo)}</td></tr>`).join('')}</tbody></table></div>
+      </details>
+    </section>`;
   }
 
   function diagramaSVG() {
     const p = partida, ultimoSeg = p.registro.reduce((m, s) => Math.max(m, s.tic), 0);
     const T = Math.max(ultimoSeg + 1, p.historia.length ? p.historia[p.historia.length - 1].tic : 1);
-    const W = 640, top = 46, fila = 34, H = top + T * fila + 12;
-    const xT = 14, xA = 196, xB = 452, xC = 476, cel = 30;
+    const cc = !!p.esc.cc;   // con congestión, más ancho (VC y modo a la izquierda de A) y filas algo más altas
+    const W = cc ? 760 : 640, top = 46, fila = cc ? 40 : 34, H = top + T * fila + 12;
+    const xT = 14, xA = cc ? 316 : 196, xB = cc ? 572 : 452, xC = xB + 24, cel = 30;
+    const inicial = cc ? (() => { const e = CC.crear(p.esc.cc); return { vcTexto: CC.texto(e), umbral: e.umbral, modo: e.modo }; })() : null;
+    let previoA = inicial;
     const bufer = p.par.bufer, casillas = bufer <= 256 ? bufer / P.MSS : 0;   // búfer grande: texto «sin leer / búfer» en lugar de casillas
     const y = (t) => top + (t - 1) * fila;
     const o = [];
-    o.push(`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de secuencia de la partida">`);
+    o.push(`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Diagrama de secuencia de la partida"${cc ? ' style="min-width:620px"' : ''}>`);
     o.push(`<text class="txt cab" x="${xA}" y="20" text-anchor="middle">A</text><text class="txt cab" x="${xB}" y="20" text-anchor="middle">B</text>`);
     o.push(`<text class="txt tenue" x="${xA - 14}" y="36" text-anchor="end">A sabe: en vuelo / W</text>`);
+    if (cc) o.push(`<text class="txt tenue" x="62" y="36">VC · modo</text>`);
     o.push(`<text class="txt tenue" x="${xC}" y="36">${casillas ? `búfer de B (${casillas} × ${P.MSS} B)` : 'sin leer / búfer de B'}</text>`);
     for (let t = 1; t <= T; t++) {
       o.push(`<line class="guia" x1="${xT + 30}" x2="${xA}" y1="${y(t)}" y2="${y(t)}" />`);
@@ -551,7 +764,13 @@
       if (x && x.humano && !x.humano.evaluacion.ok) o.push(`<text class="lbl-err" x="${xT + 26}" y="${y(t) + 4}" style="font-size:12px">✗</text>`);
       if (x) {
         const a = x.foto.A, b = x.foto.B;
-        o.push(`<text class="txt" x="${xA - 14}" y="${y(t) + 4}" text-anchor="end">${a.enVuelo} / ${a.ventRecepcion}</text>`);
+        o.push(`<text class="txt${cc ? ' halo' : ''}" x="${xA - 14}" y="${y(t) + 4}" text-anchor="end">${a.enVuelo} / ${a.ventRecepcion}</text>`);
+        if (cc) {
+          const txt = `VC ${a.vcTexto} · ${a.modo}`, cambia = a.vcTexto !== previoA.vcTexto || a.umbral !== previoA.umbral || a.modo !== previoA.modo;
+          if (cambia) o.push(`<rect class="cambia" x="57" y="${y(t) - 9}" width="${Math.ceil(txt.length * 6.7 + 10)}" height="18" rx="4" />`);
+          o.push(`<text class="txt halo${cambia ? ' cambia-t' : ''}" x="62" y="${y(t) + 4}">${txt}</text>`);
+          previoA = a;
+        }
         // Cada casilla es un hueco de 64 B del búfer, a partir del primer octeto sin leer.
         const base = b.ultimoByteLeido + 1;
         if (!casillas) o.push(`<text class="txt" x="${xC}" y="${y(t) + 4}">${b.sinLeer} / ${bufer}</text>`);
@@ -591,8 +810,11 @@
       }
     }
     for (const x of p.historia) {
-      if (x.eventos.A.some((e) => e.tipo === 'vence')) o.push(`<text class="lbl-err" x="${xA - 14}" y="${y(x.tic) - 8}" text-anchor="end">vence el temporizador</text>`);
-      else if (x.eventos.A.some((e) => e.tipo === 'rapida')) o.push(`<text class="lbl-err" x="${xA - 14}" y="${y(x.tic) - 8}" text-anchor="end">3.er ACK dup.</text>`);
+      const ev = x.eventos.A.find((e) => e.tipo === 'vence') || x.eventos.A.find((e) => e.tipo === 'rapida');
+      if (!ev) continue;
+      const d = ev.cc && ev.cc.despues, flecha = d ? ` → umbral ${dec(d.umbral)}, VC ${d.vcTexto}, ${d.modo}` : '';
+      const nombre = ev.tipo === 'vence' ? (d ? 'vence' : 'vence el temporizador') : '3.er ACK dup.';
+      o.push(`<text class="lbl-err" x="${xA - 14}" y="${y(x.tic) - 8}" text-anchor="end">${nombre}${flecha}</text>`);
     }
     if (p.fin.motivo === 'completo') {
       const tf = p.fin.tic + 1;
