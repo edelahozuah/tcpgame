@@ -52,7 +52,7 @@
   const CAMPOS = new Proxy({}, { get: (_, rol) => (rol === 'A' && ccActivo() ? camposDe(par()).A.concat(camposCC(escReal.cc.variante)) : camposDe(par())[rol]) });
   const abiertos = new Set();   // desplegables «¿Qué es?» abiertos (sobreviven al redibujar)
 
-  const cfg = { rol: 'A', esc: 'sorpresa', correccion: 'final', hoja: true, rapida: true, fuera: 'almacena', variante: 'reno' };
+  const cfg = { rol: 'A', esc: 'sorpresa', correccion: 'final', hoja: true, ventana: false, rapida: true, fuera: 'almacena', variante: 'reno' };
   let partida = null, escReal = null, refTic = null, fase = 'inicio', borrador = null, ultimaEval = null;
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -113,6 +113,7 @@
           </select>
         </label>
         <label class="check"><input type="checkbox" id="o-hoja" ${cfg.hoja ? 'checked' : ''}> Rellenar la hoja de estado en cada tic</label>
+        <label class="check"><input type="checkbox" id="o-ventana" ${cfg.ventana ? 'checked' : ''}> Dibujar la ventana con lo que apuntas en la hoja</label>
         <label class="check"><input type="checkbox" id="o-rapida" ${cfg.rapida ? 'checked' : ''}> Retransmisión rápida (3 ACK duplicados)</label>
         <p class="nota-opc" id="nota-opc"></p>
       </div>
@@ -124,6 +125,7 @@
     document.getElementById('o-fuera').value = cfg.fuera;
     document.getElementById('o-var').value = cfg.variante;
     document.getElementById('o-esc').addEventListener('change', disponibilidad);
+    document.getElementById('o-hoja').addEventListener('change', disponibilidad);
     disponibilidad();
     app.querySelectorAll('.papel').forEach((b) => b.addEventListener('click', () => { cfg.rol = b.dataset.rol; leerOpciones(); inicio(); }));
     document.getElementById('empezar').addEventListener('click', () => { leerOpciones(); empezar(); });
@@ -137,6 +139,7 @@
     document.getElementById('o-fuera').disabled = c;
     document.getElementById('o-rapida').disabled = c;
     document.getElementById('o-var').disabled = !c && !sorpresa;
+    document.getElementById('o-ventana').disabled = !document.getElementById('o-hoja').checked;   // el dibujo sale de la hoja
     document.getElementById('nota-opc').textContent = c
       ? 'En las cartas de congestión, B siempre guarda lo que llega fuera de orden y la retransmisión rápida está siempre activa: esas dos opciones no se aplican.'
       : sorpresa ? 'Si sale una carta de congestión, se usa la variante elegida y no se aplican las opciones de fuera de orden ni de retransmisión rápida.'
@@ -153,6 +156,8 @@
     if (e) cfg.esc = e.value;
     if (c) cfg.correccion = c.value;
     if (k) cfg.hoja = k.checked;
+    const vz = document.getElementById('o-ventana');
+    if (vz) cfg.ventana = vz.checked;
   }
 
   function reglasHTML() {
@@ -261,6 +266,7 @@
               ${CAMPOS[rol].map(([k, nombre, ayuda, def]) => campoHTML(k, nombre, ayuda, def, previo, verEval)).join('')}
             </div>
             <p class="ayuda nota">El valor gris es lo que apuntaste en el tic anterior${ccActivo() && rol === 'A' ? '; en Modo, el borde discontinuo marca el del tic anterior (púlsalo para confirmarlo o elige otro)' : ''}</p>
+            ${cfg.ventana ? `<div class="ventana" id="ventana" aria-live="off">${ventanaHTML(rol)}</div>` : ''}
           </section>` : ''}
           <section class="panel">
             <h3>Tu tarjeta para este tic</h3>
@@ -314,6 +320,92 @@
     </div>`;
   }
 
+  /* ---------- La ventana, dibujada con lo que el alumno ha apuntado ---------- */
+
+  /** Valor de la hoja para el dibujo: lo tecleado en este tic o, si el campo sigue vacío, lo del tic anterior. null si no hay número. */
+  function valorHoja(k, previo) {
+    const v = borrador.hoja[k] ?? '';
+    const crudo = String(v !== '' ? v : (previo[k] ?? ''));
+    if (k === 'vc') { const n = CC.leer(crudo); return typeof n === 'number' && isFinite(n) && n >= 0 ? n : null; }
+    return /^\d+$/.test(crudo) ? +crudo : null;
+  }
+
+  /**
+   * Barra con el flujo de octetos de A (una celda por segmento) pintada SOLO con lo que hay en la hoja del alumno
+   * y con lo que sabe desde el principio: no usa el estado real de la partida, así que no adelanta ninguna corrección.
+   *   A: confirmado | enviado sin confirmar | usable; borde izquierdo AN y borde derecho AN + W (o AN + mín{⌊VC⌋·MSS, W}).
+   *   B: leído por la aplicación | en el búfer sin leer | sitio que anuncia (W); AN, AN + W y el final del búfer.
+   */
+  function ventanaHTML(rol) {
+    const previo = cuadernoPrevio(), q = par(), M = P.MSS, lo = P.SN_A;
+    const v = (k) => valorHoja(k, previo);
+    const cc = rol === 'A' && ccActivo();
+    const faltan = CAMPOS[rol].filter(([k]) => k !== 'umbral' && k !== 'modo' && v(k) === null).map(([, n]) => n.replace(/ \(.*\)$/, ''));
+    const titulo = rol === 'A' ? 'Tu ventana, según lo que has apuntado' : 'Tu búfer y la ventana que anuncias, según lo que has apuntado';
+    if (faltan.length) return `<h4>${titulo}</h4><p class="vacio">Apunta ${faltan.join(', ')} para ver el dibujo.</p>`;
+
+    let zonas, marcas, lineas, leyenda;
+    const avisos = [];
+    if (rol === 'A') {
+      const env = v('ultimoByteEnviado'), rec = v('ultimoByteReconocido'), w = v('ventRecepcion');
+      const an = rec + 1, sig = Math.max(env + 1, an);
+      const limW = an + w, limVC = cc ? an + Math.floor(v('vc')) * M : null;
+      const borde = cc ? Math.min(limW, limVC) : limW;
+      if (env < rec) avisos.push('UltimoByteEnviado queda por detrás de UltimoByteReconocido.');
+      if (sig > borde) avisos.push('Lo enviado sin confirmar no cabe en la ventana.');
+      zonas = [[lo, an, 'conf'], [an, sig, 'vuelo'], [sig, borde, 'usable']];
+      marcas = [[an, 'an', `AN = ${an}`], [sig, 'sig', `siguiente SN = ${sig}`]];
+      if (cc) {
+        const mandaVC = limVC <= limW;
+        marcas.push([borde, 'borde', `AN + ${mandaVC ? '⌊VC⌋·64' : 'W'} = ${borde}`]);
+        if (limVC !== limW) marcas.push([mandaVC ? limW : limVC, 'otro', `AN + ${mandaVC ? 'W' : '⌊VC⌋·64'} = ${mandaVC ? limW : limVC}`]);
+        lineas = [`Ventana = mín{⌊VC⌋·64, W} = mín{${Math.floor(v('vc')) * M}, ${w}} = ${borde - an} B`];
+      } else {
+        marcas.push([borde, 'borde', `AN + W = ${borde}`]);
+        lineas = [`Ventana = W = ${w} B`];
+      }
+      lineas.push(`en vuelo: ${sig - an} B`, `usable: ${Math.max(0, borde - sig)} B`);
+      leyenda = [['conf', 'confirmado'], ['vuelo', 'enviado sin confirmar'], ['usable', 'usable'], ['fuera', 'fuera de ventana']];
+    } else {
+      const rcb = v('ultimoByteRecibido'), lei = v('ultimoByteLeido'), w = v('ventRecepcion');
+      const an = rcb + 1, borde = an + w, finBufer = lei + 1 + q.bufer;
+      if (lei > rcb) avisos.push('UltimoByteLeido queda por delante de UltimoByteRecibido.');
+      zonas = [[lo, lei + 1, 'conf'], [lei + 1, an, 'bufer'], [an, borde, 'usable']];
+      marcas = [[an, 'an', `AN = ${an}`], [borde, 'borde', `AN + W = ${borde}`], [finBufer, 'otro', 'fin del búfer']];
+      lineas = [`En el búfer, sin leer: ${Math.max(0, rcb - lei)} B`, `anuncias W = ${w} B`];
+      leyenda = [['conf', 'leído por tu aplicación'], ['bufer', 'en el búfer, sin leer'], ['usable', 'sitio que anuncias (W)'], ['fuera', 'fuera de ventana']];
+    }
+
+    // Lo que se ve: el fichero y dos segmentos más; lo que cae más allá se pinta en el borde, con una flecha.
+    const hi = q.fin + 2 * M, n = (hi - lo) / M;
+    const ANCHO = 520, X0 = 6, cw = (ANCHO - 2 * X0) / n, Y = 36, ALTO = 26;
+    const X = (b) => X0 + (Math.max(lo, Math.min(hi, b)) - lo) / M * cw;
+    const paso = Math.ceil(n / 9);
+    const escala = Array.from({ length: n + 1 }, (_, i) => (i % paso === 0
+      ? `<text class="v-t" x="${X(lo + i * M)}" y="26" text-anchor="${i === 0 ? 'start' : i === n ? 'end' : 'middle'}">${lo + i * M}</text>` : '')).join('');
+    const rects = zonas.filter(([a, b]) => X(b) > X(a)).map(([a, b, c]) => `<rect class="v-${c}" x="${X(a)}" y="${Y}" width="${X(b) - X(a)}" height="${ALTO}"/>`).join('');
+    const celdas = Array.from({ length: n }, (_, i) => `<rect class="v-celda" x="${X0 + i * cw}" y="${Y}" width="${cw}" height="${ALTO}"/>`).join('');
+    const finFichero = `<text class="v-t" x="${X(q.fin)}" y="11" text-anchor="middle">fin del fichero ▾</text>`;
+    // Una fila de rótulos por marca, para que no se pisen; el texto se ancla hacia dentro cerca de los extremos.
+    // Primero todas las líneas y después los textos (con halo), para que una línea no tache el rótulo de otra marca.
+    const yRot = (i) => Y + ALTO + 16 + i * 14;
+    const rotulos = marcas.map(([b, c], i) => `<line class="v-${c}" x1="${X(b)}" y1="${Y - 5}" x2="${X(b)}" y2="${yRot(i) - 10}"/>`).join('')
+      + marcas.map(([b, c, txt], i) => {
+        const x = X(b), ancla = x < ANCHO * 0.3 ? 'start' : x > ANCHO * 0.7 ? 'end' : 'middle';
+        return `<text class="v-l ${c}" x="${x + (ancla === 'start' ? 4 : ancla === 'end' ? -4 : 0)}" y="${yRot(i)}" text-anchor="${ancla}">${b < lo ? '← ' : ''}${esc(txt)}${b > hi ? ' →' : ''}</text>`;
+      }).join('');
+    const altoSvg = Y + ALTO + 16 + marcas.length * 14;
+    const desc = `${titulo}. ${marcas.map((m) => m[2]).join('; ')}. ${lineas.join('; ')}.`;
+    return `<h4>${titulo}</h4>
+      <svg viewBox="0 0 ${ANCHO} ${altoSvg}" role="img" aria-label="${esc(desc)}">
+        ${escala}${rects}${celdas}${finFichero}${rotulos}
+      </svg>
+      <p class="v-res">${lineas.map(esc).join(' · ')}</p>
+      ${avisos.length ? `<p class="v-aviso">${avisos.map(esc).join(' ')}</p>` : ''}
+      <div class="leyenda">${leyenda.map(([c, t]) => `<span><i class="caja v-${c}"></i>${t}</span>`).join('')}</div>
+      <p class="ayuda nota">Solo usa tu hoja y lo que sabes desde el principio: si un valor está mal, el dibujo sale mal.${rol === 'B' ? ' Lo que guardes fuera de orden no aparece.' : ''}</p>`;
+  }
+
   function temporizadorTxt() {
     const f = partida.historia[partida.historia.length - 1].foto.A;
     return f.vence === null ? 'parado' : `en marcha, vence al empezar el tic ${f.vence}`;
@@ -365,7 +457,11 @@
 
   function enlazarJuego() {
     app.querySelectorAll('details.def').forEach((d) => d.addEventListener('toggle', () => { if (d.open) abiertos.add(d.dataset.def); else abiertos.delete(d.dataset.def); }));
-    app.querySelectorAll('.hoja input').forEach((i) => i.addEventListener('input', () => { borrador.hoja[i.dataset.k] = i.value.trim(); }));
+    app.querySelectorAll('.hoja input').forEach((i) => i.addEventListener('input', () => {
+      borrador.hoja[i.dataset.k] = i.value.trim();
+      const vz = document.getElementById('ventana');
+      if (vz) vz.innerHTML = ventanaHTML(cfg.rol);   // el dibujo sigue lo que se va tecleando
+    }));
     app.querySelectorAll('[data-modo]').forEach((b) => b.addEventListener('click', () => {
       borrador.hoja.modo = b.dataset.modo; borrador.modoPrevio = false;
       app.querySelectorAll('[data-modo]').forEach((x) => { x.setAttribute('aria-pressed', String(x === b)); x.classList.remove('previo'); });

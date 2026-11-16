@@ -148,6 +148,35 @@ details.def summary { cursor: pointer; color: var(--ink2); width: fit-content; t
 details.def summary:hover { text-decoration-color: var(--ink2); }
 details.def p { margin: 4px 0 4px; padding: 8px 12px; background: var(--soft); border-radius: var(--r-item); color: var(--ink2); }
 
+/* La ventana dibujada con la hoja del alumno (opcional) */
+.ventana { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.ventana h4 { margin: 0 0 8px; font-size: 14px; line-height: 20px; font-weight: 500; color: var(--ink2); }
+.ventana svg { display: block; width: 100%; height: auto; }
+.ventana .v-conf { fill: var(--muted); fill-opacity: .3; }
+.ventana .v-vuelo { fill: var(--warn); fill-opacity: .6; }
+.ventana .v-usable { fill: var(--ok); fill-opacity: .55; }
+.ventana .v-bufer { fill: var(--b); fill-opacity: .8; }
+.ventana .v-fuera { fill: var(--panel); }
+.ventana .v-celda { fill: none; stroke: var(--muted); stroke-width: .75; }
+.ventana line.v-an { stroke: var(--ink); stroke-width: 2.5; }
+.ventana line.v-borde { stroke: var(--err); stroke-width: 2.5; }
+.ventana line.v-sig { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.ventana line.v-otro { stroke: var(--ink2); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.ventana .v-t { fill: var(--muted); font: 10px var(--mono); font-variation-settings: "MONO" 1, "CASL" 1; }
+.ventana .v-l { fill: var(--ink); font: 500 11px var(--mono); font-variation-settings: "MONO" 1, "CASL" 1; paint-order: stroke; stroke: var(--panel); stroke-width: 4px; }
+.ventana .v-l.borde { fill: var(--err); }
+.ventana .v-l.sig { fill: var(--warn); }
+.ventana .v-l.otro { fill: var(--ink2); }
+.ventana .v-res { margin: 8px 0 0; font-family: var(--mono); font-variation-settings: "MONO" 1, "CASL" 1; font-size: 13px; line-height: 20px; }
+.ventana .v-aviso { margin: 4px 0 0; font-size: 13px; line-height: 20px; color: var(--warn); }
+.ventana .leyenda { margin-top: 8px; }
+.ventana .leyenda i.caja { width: 14px; height: 10px; border: .75px solid var(--muted); border-radius: 2px; background: currentColor; }
+.ventana .leyenda i.v-conf { background: color-mix(in srgb, var(--muted) 30%, transparent); }
+.ventana .leyenda i.v-vuelo { background: color-mix(in srgb, var(--warn) 60%, transparent); }
+.ventana .leyenda i.v-usable { background: color-mix(in srgb, var(--ok) 55%, transparent); }
+.ventana .leyenda i.v-bufer { background: color-mix(in srgb, var(--b) 80%, transparent); }
+.ventana .leyenda i.v-fuera { background: var(--panel); }
+
 .conmutador { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--soft); border-radius: 999px; margin-bottom: 12px; }
 .conmutador button { border: 0; background: transparent; height: 32px; padding: 0 16px; cursor: pointer; border-radius: 999px; font-weight: 500; color: var(--ink2); white-space: nowrap; font-size: 14px;
   transition: background-color 160ms var(--curva), color 160ms var(--curva); }
@@ -251,7 +280,7 @@ td.num { white-space: nowrap; }
 <body>
 <main id="app" aria-live="polite"></main>
 <noscript>Este juego necesita JavaScript.</noscript>
-<script src="motor.js?v=24"></script>
-<script src="juego.js?v=24"></script>
+<script src="motor.js?v=25"></script>
+<script src="juego.js?v=25"></script>
 </body>
 </html>
